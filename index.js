@@ -3,7 +3,6 @@ const app = express();
 const cors = require("cors");
 
 app.use(cors());
-app.use(express.static('public')); /* this line tells Express to use the public folder as our static folder from which we can serve static files*/
 
 app.get('/approval_program', function(req, res) {
   res.sendFile('./teal/approval_program.teal', { root: __dirname });
