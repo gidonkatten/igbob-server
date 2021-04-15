@@ -3,6 +3,12 @@ const app = express();
 const cors = require("cors");
 
 app.use(cors());
+app.use(express.json()); //req.body
+
+// ROUTES //
+
+// apps routes
+app.use("/apps", require("./routes/apps"));
 
 app.get('/approval_program', function(req, res) {
   res.sendFile('./teal/approval_program.teal', { root: __dirname });
