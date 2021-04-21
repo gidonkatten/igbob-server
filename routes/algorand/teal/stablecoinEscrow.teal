@@ -1,0 +1,56 @@
+#pragma version 2
+txn TypeEnum
+int axfer
+==
+txn AssetCloseTo
+global ZeroAddress
+==
+&&
+txn AssetSender
+global ZeroAddress
+==
+&&
+global GroupSize
+int 1
+==
+bnz l4
+global GroupSize
+int 3
+>=
+bnz l3
+err
+l3:
+txn GroupIndex
+int 2
+==
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 0 ApplicationID
+int 3
+==
+&&
+b l5
+l4:
+txn AssetAmount
+int 0
+==
+txn Fee
+int 1000
+<=
+&&
+txn XferAsset
+int 2
+==
+&&
+txn LastValid
+int 1500
+<
+&&
+txn AssetSender
+global ZeroAddress
+==
+&&
+l5:
+&&
