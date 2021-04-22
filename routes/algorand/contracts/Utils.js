@@ -5,7 +5,6 @@ import { algodClient } from '../utils/Utils.js';
  */
 export async function compileProgram(programSource) {
   const enc = new TextEncoder();
-  // const programBytes: Uint8Array = enc.encode(programSource);
   const programBytes = enc.encode(programSource);
   const compileResponse = await algodClient.compile(programBytes).do();
   const compiledBytes = new Uint8Array(Buffer.from(compileResponse.result, "base64"));

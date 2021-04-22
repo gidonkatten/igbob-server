@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/**/*.test.ts",
-    "start": "node index",
-    "build": "tsc --project ./",
-    "tsc": "tsc"
+    "test": "mocha test/**/*.test.js",
+    "start": "node index"
   },
   "author": "",
   "license": "ISC",
@@ -23,7 +21,8 @@
     "jwks-rsa": "^2.0.2",
     "path": "^0.12.7",
     "pg": "^8.6.0",
-    "pg-format": "^1.0.4"
+    "pg-format": "^1.0.4",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",

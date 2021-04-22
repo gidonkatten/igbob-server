@@ -28,7 +28,7 @@ export async function createStatefulContract(
     onComplete, approvalProgram, clearProgram, localInts, localBytes, globalInts,
     globalBytes, appArgs);
   const rawSignedTxn = txn.signTxn(account.sk)
-  const txResult  = (await algodClient.sendRawTransaction(rawSignedTxn).do());
+  const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
   await waitForConfirmation(txResult.txId);
 

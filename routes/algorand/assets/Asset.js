@@ -24,10 +24,10 @@ export async function createAsset(
 
   // create, sign and submit
   const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(account.addr, undefined,
-    totalIssuance, assetDecimals, defaultFrozen, undefined, undefined, undefined,
-    undefined, unitName, assetName, undefined, undefined, params);
+    totalIssuance, assetDecimals, defaultFrozen, account.addr, account.addr, account.addr,
+    account.addr, unitName, assetName, undefined, undefined, params);
   const rawSignedTxn = txn.signTxn(account.sk)
-  const txResult = (await algodClient.sendRawTransaction(rawSignedTxn).do());
+  const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
   await waitForConfirmation(txResult.txId);
 
@@ -54,7 +54,7 @@ export async function optIntoAssetFromEscrow(assetId, addr, lsig, params) {
   const txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
     addr, addr, undefined, undefined, 0, undefined, assetId, params);
   const rawSignedTxn = algosdk.signLogicSigTransactionObject(txn, lsig)
-  const txResult = (await algodClient.sendRawTransaction(rawSignedTxn.blob).do());
+  const txResult = await algodClient.sendRawTransaction(rawSignedTxn.blob).do();
 
   return txResult.txId;
 }
@@ -62,7 +62,7 @@ export async function optIntoAssetFromEscrow(assetId, addr, lsig, params) {
 /**
  * Send asset from account to given address
  */
- export async function sendAsset(account, assetId, toAddr, amount, params) {
+ export async function revokeAsset(clawbackAccount, revocationTarget, recipient, assetId, amount, params) {
   if (params === undefined) {
     // Get node suggested parameters
     let txParams = await algodClient.getTransactionParams().do();
@@ -72,9 +72,9 @@ export async function optIntoAssetFromEscrow(assetId, addr, lsig, params) {
   }
 
   const txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
-    account.addr, toAddr, undefined, undefined, amount, undefined, assetId, params);
-    const rawSignedTxn = txn.signTxn(account.sk)
-    const txResult = (await algodClient.sendRawTransaction(rawSignedTxn).do());
+    clawbackAccount.addr, recipient, undefined, revocationTarget, amount, undefined, assetId, params);
+    const rawSignedTxn = txn.signTxn(clawbackAccount.sk)
+    const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
   return txResult.txId;
 }
@@ -100,7 +100,7 @@ export async function optIntoAssetFromEscrow(assetId, addr, lsig, params) {
   }
 
   const txn = algosdk.makeAssetConfigTxnWithSuggestedParams(
-    account.addr, undefined, assetId, manager, reserve, freeze, clawback, params);
+    account.addr, undefined, assetId, manager, reserve, freeze, clawback, params, false);
   const rawSignedTxn = txn.signTxn(account.sk)
   const txResult = (await algodClient.sendRawTransaction(rawSignedTxn).do());
 

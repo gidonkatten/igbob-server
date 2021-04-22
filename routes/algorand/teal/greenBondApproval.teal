@@ -87,7 +87,7 @@ txn Sender
 ==
 &&
 gtxn 2 XferAsset
-int 2
+int 15435388
 ==
 &&
 gtxn 2 AssetAmount
@@ -191,7 +191,7 @@ txn Sender
 ==
 &&
 gtxn 2 XferAsset
-int 2
+int 15435388
 ==
 &&
 gtxn 2 AssetAmount
@@ -342,7 +342,7 @@ app_global_get
 ==
 &&
 gtxn 3 XferAsset
-int 2
+int 15435388
 ==
 &&
 gtxn 3 AssetAmount

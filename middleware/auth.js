@@ -1,9 +1,9 @@
 import jwt from 'express-jwt';
 import jwtAuthz from 'express-jwt-authz';
 import jwksRsa from 'jwks-rsa';
-import { config } from 'dotenv'
+import dotenv from "dotenv"
 
-config(); // allows us to access env variables
+dotenv.config(); // allows us to access env variables
 
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against

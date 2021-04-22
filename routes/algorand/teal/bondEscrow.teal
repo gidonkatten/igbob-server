@@ -24,7 +24,7 @@ int appl
 ==
 &&
 gtxn 0 ApplicationID
-int 3
+int VAR_TMPL_APP_ID
 ==
 &&
 b l5
@@ -37,11 +37,11 @@ int 1000
 <=
 &&
 txn XferAsset
-int 1
+int VAR_TMPL_BOND_ID
 ==
 &&
 txn LastValid
-int 1500
+int VAR_TMPL_LV
 <
 &&
 txn AssetSender

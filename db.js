@@ -1,7 +1,7 @@
 import pg from 'pg';
-import { config } from 'dotenv'
+import dotenv from "dotenv"
 
-config(); // allows us to access env variables
+dotenv.config(); // allows us to access env variables
 
 export default new pg.Pool({
     user: process.env.user,
