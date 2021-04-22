@@ -13,11 +13,11 @@ router.post("/create-app", checkJwt, checkIssueScope, async (req, res) => {
       bondCouponInstallments, bondPrincipal
     } = req.body;
 
-    const newApp = await issueBond(totalIssuance, bondUnitName, bondName, 
+    issueBond(totalIssuance, bondUnitName, bondName, 
       issuerAddr, startBuyDate, endBuyDate, maturityDate, bondCost, 
       bondCouponPaymentVal, bondCouponInstallments, bondPrincipal);
 
-    res.json(newApp);
+    res.json('Submitted issue request');
     
   } catch (err) {
     console.error(err.message);
