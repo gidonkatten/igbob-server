@@ -7,7 +7,7 @@ export default new pg.Pool({
     user: process.env.user,
     password: process.env.password,
     host: process.env.host,
-    port: (process.env.port),
+    port: process.env.dbport,
     database: process.env.database,
     ssl: true
 })

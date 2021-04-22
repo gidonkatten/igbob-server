@@ -3,10 +3,6 @@ import cors from "cors";
 import { appRoute } from "./routes/apps.js"
 
 const app = express();
-// const corsOptions =  {
-//   origin: 'http://localhost:3000'
-// };
-// app.use(cors(corsOptions));
 app.use(cors());
 app.use(express.json()); //req.body
 

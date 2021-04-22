@@ -25,13 +25,25 @@ router.post("/create-app", checkJwt, checkIssueScope, async (req, res) => {
   }
 });
 
-router.get("/all-apps", checkJwt, checkIssueScope, async (req, res) => {
+router.get("/all-apps", checkJwt, async (req, res) => {
   try {
     const apps = await pool.query(
       "SELECT * FROM apps"
     );
 
     res.json(apps.rows);
+    
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+router.get("/test", async (req, res) => {
+  try {
+    
+    console.log('called');
+    res.json({ user: 'tj' });
     
   } catch (err) {
     console.error(err.message);
