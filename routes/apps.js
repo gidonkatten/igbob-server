@@ -5,7 +5,7 @@ import { issueBond } from "./algorand/issue/IssueBond.js";
 
 const router = Router();
 
-router.post("/create-app", checkJwt, checkIssueScope, async (req, res) => {
+router.post("/create-app", checkJwt, async (req, res) => {
   try {
     const { 
       totalIssuance, bondUnitName, bondName, issuerAddr, startBuyDate, 
@@ -39,16 +39,4 @@ router.get("/all-apps", checkJwt, async (req, res) => {
   }
 });
 
-router.get("/test", async (req, res) => {
-  try {
-    
-    console.log('called');
-    res.json({ user: 'tj' });
-    
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
-});
-
-export { router as appRoute }
+export { router as appsRoute }
