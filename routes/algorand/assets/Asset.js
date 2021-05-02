@@ -1,7 +1,6 @@
 import algosdk from "algosdk";
 import { algodClient, waitForConfirmation } from '../utils/Utils.js';
 
-
 /**
  * Create asset using account
  */

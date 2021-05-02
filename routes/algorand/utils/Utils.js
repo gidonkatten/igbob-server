@@ -7,6 +7,8 @@ const token = {
 };
 export const algodClient = new algosdk.Algodv2(token, baseServer, port);
 
+export const STABLECOIN_ID = 15435388;
+
 /**
  * utility function to wait on a transaction to be confirmed
  * the timeout parameter indicates how many rounds do you wish to check pending transactions for
@@ -51,7 +53,7 @@ export const waitForConfirmation = async function (txId, timeout = 1000) {
 export const masterAccount = algosdk.mnemonicToSecretKey(process.env.ALGOD_ACCOUNT_MNEMONIC);
 
 /**
- * Fund given account using master account
+ * Fund given account with algo using master account
  */
 export async function fundAccount(address, amount, params) {
   if (params === undefined) {
@@ -67,6 +69,26 @@ export async function fundAccount(address, amount, params) {
     amount, undefined, undefined, params);
   const rawSignedTxn = txn.signTxn(masterAccount.sk)
   const txResult = (await algodClient.sendRawTransaction(rawSignedTxn).do());
+
+  return txResult.txId;
+}
+
+/**
+ * Fund given account with stablecoin using master account
+ */
+ export async function fundAccountWithStablecoin(address, amount, params) {
+  if (params === undefined) {
+    // Get node suggested parameters
+    let txParams = await algodClient.getTransactionParams().do();
+    txParams.fee = 1000;
+    txParams.flatFee = true;
+    params = txParams;
+  }
+
+  const txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+    masterAccount.addr, address, undefined, undefined, amount, undefined, STABLECOIN_ID, params);
+    const rawSignedTxn = txn.signTxn(masterAccount.sk)
+    const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
   return txResult.txId;
 }

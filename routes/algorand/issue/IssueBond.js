@@ -2,13 +2,11 @@ import algosdk from 'algosdk';
 import fs from 'fs';
 import { resolve } from 'path';
 import pool from "../../../db.js";
-import { algodClient, fundAccount, waitForConfirmation } from '../utils/Utils.js';
+import { algodClient, fundAccount, waitForConfirmation, STABLECOIN_ID } from '../utils/Utils.js';
 import { configAsset, createAsset, optIntoAssetFromEscrow, revokeAsset } from '../assets/Asset.js';
 import { createStatefulContract } from '../contracts/CreateStatefulContract.js';
 import { compileProgram, encodeUint64, stringToUint64 } from '../contracts/Utils.js';
 import { convertDateToUnixTime } from '../../../utils/Utils.js';
-
-const STABLECOIN_ID = 15435388;
 
 /**
  * Issue bond
