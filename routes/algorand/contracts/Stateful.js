@@ -39,3 +39,30 @@ export async function createStatefulContract(
 
   return appId;
 }
+
+/**
+ * Create and submit a stateful smart contract from given account
+ */
+ export async function updateStatefulContract(
+  appId,
+  account,
+  approvalProgram,
+  clearProgram,
+  params
+) {
+  if (params === undefined) {
+    // Get node suggested parameters
+    let txParams = await algodClient.getTransactionParams().do();
+    txParams.fee = 1000;
+    txParams.flatFee = true;
+    params = txParams;
+  }
+
+  // Create, sign and send
+  const txn = algosdk.makeApplicationUpdateTxn(account.addr, params, appId,
+    approvalProgram, clearProgram);
+  const rawSignedTxn = txn.signTxn(account.sk)
+  const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
+
+  return txResult.txId;
+}

@@ -1,34 +1,159 @@
-#pragma version 2
+#pragma version 3
 txn TypeEnum
 int axfer
 ==
-txn AssetCloseTo
-global ZeroAddress
-==
-&&
 global GroupSize
 int 1
 ==
-bnz l4
-global GroupSize
-int 3
->=
-bnz l3
-err
-l3:
-txn GroupIndex
-int 1
-==
+bnz l9
 gtxn 0 TypeEnum
 int appl
 ==
-&&
 gtxn 0 ApplicationID
-int VAR_TMPL_APP_ID
+int VAR_TMPL_MAIN_APP_ID
 ==
 &&
-b l5
-l4:
+txn GroupIndex
+int 1
+==
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int VAR_TMPL_BOND_ID
+==
+&&
+&&
+assert
+gtxna 0 ApplicationArgs 0
+byte "buy"
+==
+bnz l7
+gtxna 0 ApplicationArgs 0
+byte "trade"
+==
+bnz l6
+gtxna 0 ApplicationArgs 0
+byte "sell"
+==
+bnz l5
+err
+l5:
+global GroupSize
+int 5
+==
+gtxn 1 AssetSender
+gtxn 0 Sender
+==
+gtxn 1 AssetReceiver
+gtxn 1 Sender
+==
+&&
+gtxn 1 AssetCloseTo
+gtxn 1 Sender
+==
+&&
+&&
+gtxn 3 TypeEnum
+int pay
+==
+gtxn 3 Sender
+gtxn 0 Sender
+==
+&&
+gtxn 3 Receiver
+gtxn 1 Sender
+==
+&&
+gtxn 3 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l8
+l6:
+global GroupSize
+int 3
+>=
+gtxn 1 AssetSender
+gtxn 0 Sender
+==
+gtxn 1 AssetReceiver
+gtxna 0 Accounts 1
+==
+&&
+&&
+gtxn 2 TypeEnum
+int pay
+==
+gtxn 2 Sender
+gtxn 0 Sender
+==
+&&
+gtxn 2 Receiver
+gtxn 1 Sender
+==
+&&
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l8
+l7:
+global GroupSize
+int 4
+==
+gtxn 1 AssetSender
+gtxn 1 Sender
+==
+gtxn 1 AssetReceiver
+gtxn 0 Sender
+==
+&&
+&&
+gtxn 2 TypeEnum
+int pay
+==
+gtxn 2 Sender
+gtxn 0 Sender
+==
+&&
+gtxn 2 Receiver
+gtxn 1 Sender
+==
+&&
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+gtxn 3 TypeEnum
+int axfer
+==
+gtxn 3 Sender
+gtxn 0 Sender
+==
+&&
+gtxn 3 AssetReceiver
+addr VAR_TMPL_ISSUER_ADDR
+==
+&&
+gtxn 3 XferAsset
+int VAR_TMPL_STABLECOIN_ID
+==
+&&
+gtxn 3 AssetAmount
+gtxn 1 AssetAmount
+int VAR_TMPL_BOND_COST
+*
+==
+&&
+&&
+l8:
+b l10
+l9:
 txn AssetAmount
 int 0
 ==
@@ -48,5 +173,9 @@ txn AssetSender
 global ZeroAddress
 ==
 &&
-l5:
+txn AssetCloseTo
+global ZeroAddress
+==
+&&
+l10:
 &&

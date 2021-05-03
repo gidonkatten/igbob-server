@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import pool from "../db.js";
-import { checkJwt, checkIssueScope } from "../middleware/auth.js";
+import { checkJwt } from "../middleware/auth.js";
 import { issueBond } from "./algorand/issue/IssueBond.js";
 
 const router = Router();
@@ -8,14 +8,12 @@ const router = Router();
 router.post("/create-app", checkJwt, async (req, res) => {
   try {
     const { 
-      totalIssuance, bondUnitName, bondName, issuerAddr, startBuyDate, 
-      endBuyDate, maturityDate, bondCost, bondCouponPaymentVal, 
-      bondCouponInstallments, bondPrincipal
+      totalIssuance, bondUnitName, bondName, issuerAddr, bondLength, 
+      startBuyDate, endBuyDate, bondCost, bondCoupon, bondPrincipal
     } = req.body;
 
-    issueBond(totalIssuance, bondUnitName, bondName, 
-      issuerAddr, startBuyDate, endBuyDate, maturityDate, bondCost, 
-      bondCouponPaymentVal, bondCouponInstallments, bondPrincipal);
+    issueBond(totalIssuance, bondUnitName, bondName, issuerAddr, bondLength, 
+      startBuyDate, endBuyDate, bondCost, bondCoupon, bondPrincipal);
 
     res.json('Submitted issue request');
     

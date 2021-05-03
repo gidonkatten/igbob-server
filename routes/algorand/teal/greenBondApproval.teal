@@ -1,454 +1,192 @@
-#pragma version 2
+#pragma version 3
 txn GroupIndex
 int 0
 ==
-txn ApplicationID
-int 0
-==
-bnz l32
 txn OnCompletion
 int DeleteApplication
 ==
-bnz l31
+bnz l22
 txn OnCompletion
 int UpdateApplication
 ==
-bnz l30
+bnz l21
 txn OnCompletion
 int CloseOut
 ==
-bnz l29
+bnz l20
 txn OnCompletion
 int OptIn
 ==
-bnz l26
-txna ApplicationArgs 0
-byte "set_stablecoin_escrow"
-==
-bnz l23
+bnz l19
 txna ApplicationArgs 0
 byte "buy"
 ==
-bnz l20
+bnz l18
 txna ApplicationArgs 0
 byte "trade"
 ==
-bnz l17
-txna ApplicationArgs 0
-byte "claim_coupon"
-==
 bnz l14
 txna ApplicationArgs 0
-byte "claim_principal"
+byte "coupon"
 ==
-bnz l11
+bnz l10
+txna ApplicationArgs 0
+byte "sell"
+==
+bnz l9
 err
-l11:
-global GroupSize
-int 5
-==
-gtxn 1 TypeEnum
-int axfer
-==
-gtxn 1 AssetSender
-txn Sender
-==
-&&
-gtxn 1 AssetReceiver
-gtxn 1 Sender
-==
-&&
-gtxn 1 XferAsset
-byte "BondID"
-app_global_get
-==
-&&
-gtxn 1 AssetAmount
+l9:
 int 0
-byte "NoOfBondsOwned"
-app_local_get
-==
-&&
-gtxn 1 AssetCloseTo
-gtxn 1 Sender
-==
-&&
-&&
-gtxn 2 TypeEnum
-int axfer
-==
-gtxn 2 Sender
-byte "StablecoinEscrowAddr"
-app_global_get
-==
-&&
-gtxn 2 AssetReceiver
-txn Sender
-==
-&&
-gtxn 2 XferAsset
-int 15435388
-==
-&&
-gtxn 2 AssetAmount
-gtxn 1 AssetAmount
-byte "BondPrincipal"
-app_global_get
-*
-==
-&&
-&&
-gtxn 3 TypeEnum
-int pay
-==
-gtxn 3 Sender
-txn Sender
-==
-&&
-gtxn 3 Receiver
-gtxn 1 Sender
-==
-&&
-gtxn 3 Amount
-gtxn 1 Fee
->=
-&&
-&&
-gtxn 4 TypeEnum
-int pay
-==
-gtxn 4 Sender
-txn Sender
-==
-&&
-gtxn 4 Receiver
-gtxn 2 Sender
-==
-&&
-gtxn 4 Amount
-gtxn 2 Fee
->=
-&&
-&&
-byte "BondCouponInstallments"
-app_global_get
-int 0
-byte "NoOfBondCouponPayments"
-app_local_get
-==
-&&
-global LatestTimestamp
-byte "MaturityDate"
-app_global_get
->=
-&&
-bnz l13
-err
-l13:
-int 0
-byte "NoOfBondsOwned"
-int 0
-app_local_put
-int 1
-b l35
-l14:
-int 0
-byte "NoOfBondCouponPayments"
-app_local_get
-int 1
-+
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
 store 0
-global GroupSize
-int 3
+store 1
+gtxn 1 AssetAmount
+load 1
 ==
-gtxn 1 TypeEnum
-int pay
-==
-gtxn 1 Sender
-txn Sender
-==
-&&
-gtxn 1 Receiver
-byte "StablecoinEscrowAddr"
-app_global_get
-==
-&&
-gtxn 1 Amount
-gtxn 2 Fee
->=
-&&
-&&
-gtxn 2 TypeEnum
-int axfer
-==
-gtxn 2 Sender
-byte "StablecoinEscrowAddr"
-app_global_get
-==
-&&
-gtxn 2 AssetReceiver
-txn Sender
-==
-&&
-gtxn 2 XferAsset
-int 15435388
-==
-&&
-gtxn 2 AssetAmount
-byte "BondCouponPaymentValue"
-app_global_get
+int VAR_TMPL_BOND_LENGTH
 int 0
-byte "NoOfBondsOwned"
+byte "CouponsPayed"
 app_local_get
-*
+==
+int VAR_TMPL_BOND_COUPON
+int 0
+==
+||
+&&
+gtxn 1 Sender
+addr VAR_TMPL_BOND_ESCROW_ADDR
 ==
 &&
-&&
-load 0
-byte "BondCouponInstallments"
-app_global_get
-<=
+gtxn 2 Sender
+addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+==
 &&
 global LatestTimestamp
-byte "EndBuyDate"
-app_global_get
-byte "MaturityDate"
-app_global_get
-byte "EndBuyDate"
-app_global_get
--
-byte "BondCouponInstallments"
-app_global_get
-/
-load 0
-*
-+
+int VAR_TMPL_MATURITY_DATE
 >=
 &&
+assert
+int 1
+b l23
+l10:
+int 0
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
+store 0
+store 1
+gtxn 2 AssetAmount
+int VAR_TMPL_BOND_COUPON
+load 1
+*
+==
+int 0
+byte "CouponsPayed"
+app_local_get
+global LatestTimestamp
+int VAR_TMPL_MATURITY_DATE
+>
+bnz l12
+global LatestTimestamp
+int VAR_TMPL_END_BUY_DATE
+-
+int 15768000
+/
+b l13
+l12:
+int VAR_TMPL_BOND_LENGTH
+l13:
+<
+&&
+gtxn 2 Sender
+addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+==
+&&
+assert
+int 0
+byte "CouponsPayed"
+int 0
+byte "CouponsPayed"
+app_local_get
+int 1
++
+app_local_put
+byte "TotCouponsPayed"
+byte "TotCouponsPayed"
+app_global_get
+load 1
++
+app_global_put
+int 1
+b l23
+l14:
+gtxn 1 Sender
+addr VAR_TMPL_BOND_ESCROW_ADDR
+==
+global LatestTimestamp
+int VAR_TMPL_END_BUY_DATE
+>
+global LatestTimestamp
+int VAR_TMPL_MATURITY_DATE
+<
+&&
+&&
+assert
+int 1
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
+store 2
+store 3
+load 3
+int 0
+>
 bnz l16
-err
+int 1
+byte "CouponsPayed"
+int 0
+byte "CouponsPayed"
+app_local_get
+app_local_put
+b l17
 l16:
 int 0
-byte "NoOfBondCouponPayments"
-load 0
-app_local_put
+byte "CouponsPayed"
+app_local_get
 int 1
-b l35
+byte "CouponsPayed"
+app_local_get
+==
+assert
 l17:
-global GroupSize
-int 3
->=
-gtxn 1 TypeEnum
-int axfer
-==
-gtxn 1 AssetSender
-txn Sender
-==
-&&
-gtxn 1 AssetReceiver
-txna Accounts 1
-==
-&&
-byte "BondID"
-app_global_get
-gtxn 1 XferAsset
-==
-&&
-&&
-gtxn 2 TypeEnum
-int pay
-==
-gtxn 2 Sender
-txn Sender
-==
-&&
-gtxn 2 Receiver
-gtxn 1 Sender
-==
-&&
-gtxn 2 Amount
-gtxn 1 Fee
->=
-&&
-&&
-bnz l19
-err
-l19:
-int 0
-byte "NoOfBondsOwned"
-int 0
-byte "NoOfBondsOwned"
-app_local_get
-gtxn 1 AssetAmount
--
-app_local_put
 int 1
-byte "NoOfBondsOwned"
-int 1
-byte "NoOfBondsOwned"
-app_local_get
-gtxn 1 AssetAmount
-+
-app_local_put
-int 1
-b l35
-l20:
-global GroupSize
-int 4
-==
-gtxn 1 TypeEnum
-int axfer
-==
-gtxn 1 AssetSender
+b l23
+l18:
 gtxn 1 Sender
+addr VAR_TMPL_BOND_ESCROW_ADDR
 ==
-&&
-gtxn 1 AssetReceiver
-txn Sender
-==
-&&
-gtxn 1 XferAsset
-byte "BondID"
-app_global_get
-==
-&&
-&&
-gtxn 2 TypeEnum
-int pay
-==
-gtxn 2 Sender
-txn Sender
-==
-&&
-gtxn 2 Receiver
-gtxn 1 Sender
-==
-&&
-gtxn 2 Amount
-gtxn 1 Fee
->=
-&&
-&&
-gtxn 3 TypeEnum
-int axfer
-==
-gtxn 3 Sender
-txn Sender
-==
-&&
-gtxn 3 AssetReceiver
-byte "IssuerAddr"
-app_global_get
-==
-&&
-gtxn 3 XferAsset
-int 15435388
-==
-&&
-gtxn 3 AssetAmount
-gtxn 1 AssetAmount
-byte "BondCost"
-app_global_get
-*
-==
-&&
-&&
 global LatestTimestamp
-byte "StartBuyDate"
-app_global_get
+int VAR_TMPL_START_BUY_DATE
 >=
 global LatestTimestamp
-byte "EndBuyDate"
-app_global_get
+int VAR_TMPL_END_BUY_DATE
 <=
 &&
 &&
-bnz l22
-err
+b l23
+l19:
+global GroupSize
+int 1
+==
+assert
+int 1
+b l23
+l20:
+int 0
+b l23
+l21:
+int 0
+b l23
 l22:
 int 0
-byte "NoOfBondsOwned"
-int 0
-byte "NoOfBondsOwned"
-app_local_get
-gtxn 1 AssetAmount
-+
-app_local_put
-int 1
-b l35
 l23:
-global LatestTimestamp
-byte "StartBuyDate"
-app_global_get
-<=
-bnz l25
-err
-l25:
-byte "StablecoinEscrowAddr"
-txna ApplicationArgs 1
-app_global_put
-int 1
-b l35
-l26:
-global GroupSize
-int 1
-==
-bnz l28
-err
-l28:
-int 1
-b l35
-l29:
-int 0
-b l35
-l30:
-int 0
-b l35
-l31:
-int 0
-b l35
-l32:
-txn NumAppArgs
-int 9
-==
-bnz l34
-err
-l34:
-byte "IssuerAddr"
-txna ApplicationArgs 0
-app_global_put
-byte "StartBuyDate"
-txna ApplicationArgs 1
-btoi
-app_global_put
-byte "EndBuyDate"
-txna ApplicationArgs 2
-btoi
-app_global_put
-byte "MaturityDate"
-txna ApplicationArgs 3
-btoi
-app_global_put
-byte "BondID"
-txna ApplicationArgs 4
-btoi
-app_global_put
-byte "BondCost"
-txna ApplicationArgs 5
-btoi
-app_global_put
-byte "BondCouponPaymentValue"
-txna ApplicationArgs 6
-btoi
-app_global_put
-byte "BondCouponInstallments"
-txna ApplicationArgs 7
-btoi
-app_global_put
-byte "BondPrincipal"
-txna ApplicationArgs 8
-btoi
-app_global_put
-int 1
-l35:
 &&
