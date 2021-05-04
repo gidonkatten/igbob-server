@@ -12,9 +12,11 @@ import { convertDateToUnixTime } from '../../../utils/Utils.js';
  * Issue bond
  */
 export async function issueBond(
-  totalIssuance,
-  bondUnitName,
+  name,
+  description,
   bondName,
+  bondUnitName,
+  totalIssuance,
   issuerAddr,
   bondLength,
   startBuyDate,
@@ -146,10 +148,12 @@ export async function issueBond(
 
   // insert into apps table
   const newApp = await pool.query(
-    "INSERT INTO apps(app_id, bond_id, bond_escrow_address, " + 
-    "bond_escrow_program, stablecoin_escrow_address, stablecoin_escrow_program) " + 
-    "VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
-    [appId, bondId, bondEscrowAddr, bondEscrowProgram, stcEscrowAddr, stcEscrowProgram]
+    "INSERT INTO apps(app_id, name, description, issuer_address, bond_id, " + 
+    "bond_escrow_address, bond_escrow_program, " + 
+    "stablecoin_escrow_address, stablecoin_escrow_program) " + 
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+    [appId, name, description, issuerAddr, bondId, bondEscrowAddr, 
+      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram]
   );
 
   return newApp.rows[0];
