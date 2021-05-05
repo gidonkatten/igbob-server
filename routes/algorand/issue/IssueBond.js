@@ -148,12 +148,16 @@ export async function issueBond(
 
   // insert into apps table
   const newApp = await pool.query(
-    "INSERT INTO apps(app_id, name, description, issuer_address, bond_id, " + 
-    "bond_escrow_address, bond_escrow_program, " + 
-    "stablecoin_escrow_address, stablecoin_escrow_program) " + 
-    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+    "INSERT INTO apps(" + 
+      "app_id, name, description, issuer_address, bond_id, " + 
+      "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " + 
+      "stablecoin_escrow_program, bond_length, start_buy_date, " + 
+      "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" + 
+    ")" + 
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *",
     [appId, name, description, issuerAddr, bondId, bondEscrowAddr, 
-      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram]
+      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, sbd, 
+      ebd, md, bondCost, bondCoupon, bondPrincipal]
   );
 
   return newApp.rows[0];
