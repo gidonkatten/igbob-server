@@ -1,0 +1,162 @@
+#pragma version 3
+txn ApplicationID
+int 0
+==
+bnz l28
+txn OnCompletion
+int DeleteApplication
+==
+bnz l27
+txn OnCompletion
+int UpdateApplication
+==
+bnz l26
+txn OnCompletion
+int CloseOut
+==
+bnz l25
+txn OnCompletion
+int OptIn
+==
+bnz l24
+txn OnCompletion
+int NoOp
+==
+bnz l7
+err
+l7:
+txna Applications 1
+int VAR_TMPL_MAIN_APP_ID
+==
+txna Assets 0
+int VAR_TMPL_BOND_ID
+==
+&&
+txna Accounts 1
+addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+==
+&&
+txna Accounts 2
+addr VAR_TMPL_BOND_ESCROW_ADDR
+==
+&&
+assert
+int 1
+int VAR_TMPL_STABLECOIN_ID
+asset_holding_get AssetBalance
+store 0
+store 1
+int 2
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
+store 2
+store 3
+int 0
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
+store 4
+store 5
+int 0
+asset_params_get AssetTotal
+store 6
+store 7
+int 1
+byte "TotCouponsPayed"
+app_global_get_ex
+store 8
+store 9
+int VAR_TMPL_BOND_COUPON
+global LatestTimestamp
+int VAR_TMPL_MATURITY_DATE
+>=
+bnz l12
+global LatestTimestamp
+int VAR_TMPL_END_BUY_DATE
+<
+bnz l10
+global LatestTimestamp
+int VAR_TMPL_END_BUY_DATE
+-
+int VAR_TMPL_PERIOD
+/
+b l11
+l10:
+int 0
+l11:
+b l13
+l12:
+int VAR_TMPL_BOND_LENGTH
+l13:
+load 7
+load 3
+-
+*
+load 9
+-
+*
+global LatestTimestamp
+int VAR_TMPL_MATURITY_DATE
+>=
+bnz l15
+int 0
+b l16
+l15:
+int VAR_TMPL_BOND_PRINCIPAL
+load 7
+load 3
+-
+*
+l16:
++
+load 1
+>
+store 10
+txna ApplicationArgs 0
+byte "defaulted"
+==
+bnz l22
+txna ApplicationArgs 0
+byte "not_defaulted"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "claim_default"
+==
+bnz l20
+err
+l20:
+load 10
+load 7
+load 3
+-
+load 5
+/
+load 1
+gtxn 3 AssetAmount
+/
+==
+&
+b l23
+l21:
+load 10
+!
+b l23
+l22:
+load 10
+l23:
+b l29
+l24:
+int 0
+b l29
+l25:
+int 0
+b l29
+l26:
+int 0
+b l29
+l27:
+int 0
+b l29
+l28:
+int 1
+l29:

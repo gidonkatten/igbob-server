@@ -19,6 +19,7 @@ export async function issueBond(
   totalIssuance,
   issuerAddr,
   bondLength,
+  period,
   startBuyDate,
   endBuyDate,
   bondCost,
@@ -35,7 +36,7 @@ export async function issueBond(
   console.log("New account " + account.addr);
 
   // fund account with min balance needed
-  const fundAccountTxId = await fundAccount(account.addr, 2000000, params);
+  const fundAccountTxId = await fundAccount(account.addr, 3000000, params);
   await waitForConfirmation(fundAccountTxId);
   console.log("Funded new account");
 
@@ -43,11 +44,17 @@ export async function issueBond(
   const bondId = await createAsset(account, totalIssuance, 0, true,
     bondUnitName, bondName, params);
 
-  // create app
-  const stateStorage = {
+  // create apps
+  const mainAppStateStorage = {
     localInts: 1,
     localBytes: 0,
     globalInts: 1,
+    globalBytes: 0,
+  }
+  const manageAppStateStorage = {
+    localInts: 0,
+    localBytes: 0,
+    globalInts: 0,
     globalBytes: 0,
   }
   const appArgs = [];
@@ -57,8 +64,10 @@ export async function issueBond(
     resolve('routes/algorand/teal/greenBondClear.teal'), 'utf8');
   const initialApproval = await compileProgram(initialApprovalProgram);
   const clear = await compileProgram(clearProgram);
-  const appId = await createStatefulContract(account, initialApproval, clear, 
-    stateStorage, appArgs, params);
+  const mainAppId = await createStatefulContract(account, initialApproval, clear, 
+    mainAppStateStorage, appArgs, params);
+  const manageAppId = await createStatefulContract(account, initialApproval, clear, 
+    manageAppStateStorage, appArgs, params);
 
   // Used to construct contracts
   const sbd = convertDateToUnixTime(startBuyDate);
@@ -66,11 +75,13 @@ export async function issueBond(
   const md = ebd + (15768000 * bondLength);
   let mapReplace = {
     VAR_TMPL_LV: params.lastRound + 500,
-    VAR_TMPL_MAIN_APP_ID: appId,
+    VAR_TMPL_MAIN_APP_ID: mainAppId,
+    VAR_TMPL_MANAGE_APP_ID: manageAppId,
     VAR_TMPL_BOND_ID: bondId,
     VAR_TMPL_STABLECOIN_ID: STABLECOIN_ID,
     VAR_TMPL_ISSUER_ADDR: issuerAddr,
     VAR_TMPL_BOND_LENGTH: bondLength,
+    VAR_TMPL_PERIOD: period,
     VAR_TMPL_START_BUY_DATE: sbd,
     VAR_TMPL_END_BUY_DATE: ebd,
     VAR_TMPL_MATURITY_DATE: md,
@@ -78,14 +89,14 @@ export async function issueBond(
     VAR_TMPL_BOND_COUPON: bondCoupon,
     VAR_TMPL_BOND_PRINCIPAL: bondPrincipal
   }
-  const escrowRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL/g
+  const escrowRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_MANAGE_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_PERIOD|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL/g
 
   // create escrow address for bond
   const bondEscrowFile = fs.readFileSync(
     resolve('routes/algorand/teal/bondEscrow.teal'), 'utf8');
   const bondEscrowProgram = bondEscrowFile.replace(
     escrowRep,
-    function(matched){
+    function(matched) {
       return mapReplace[matched];
     }
   );
@@ -98,7 +109,7 @@ export async function issueBond(
     resolve('routes/algorand/teal/stablecoinEscrow.teal'), 'utf8');
   const stcEscrowProgram = stcEscrowFile.replace(
     escrowRep,
-    function(matched){
+    function(matched) {
       return mapReplace[matched];
     }
   );
@@ -128,35 +139,49 @@ export async function issueBond(
   // set bond clawback to 'bondEscrowAddr' + lock bond by clearing the freezer and manager
   configAsset(account, bondId, undefined, account.addr, undefined, bondEscrowAddr, params);
 
-  // update app
+  // update apps
   mapReplace = {
     ...mapReplace,
     VAR_TMPL_STABLECOIN_ESCROW_ADDR: stcEscrowAddr,
     VAR_TMPL_BOND_ESCROW_ADDR: bondEscrowAddr
   }
-  const updateAppRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL|VAR_TMPL_STABLECOIN_ESCROW_ADDR|VAR_TMPL_BOND_ESCROW_ADDR/g
-  const updateAppFile = fs.readFileSync(
+  const updateAppRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_MANAGE_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_PERIOD|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL|VAR_TMPL_STABLECOIN_ESCROW_ADDR|VAR_TMPL_BOND_ESCROW_ADDR/g
+  
+  // update main
+  const updateMainAppFile = fs.readFileSync(
     resolve('routes/algorand/teal/greenBondApproval.teal'), 'utf8');
-  const updateAppProgram = updateAppFile.replace(
+  const updateMainAppProgram = updateMainAppFile.replace(
     updateAppRep,
-    function(matched){
+    function(matched) {
       return mapReplace[matched];
     }
   );
-  const updateApp = await compileProgram(updateAppProgram);
-  updateStatefulContract(appId, account, updateApp, clear, params);
+  const updateMainApp = await compileProgram(updateMainAppProgram);
+  updateStatefulContract(mainAppId, account, updateMainApp, clear, params);
+
+  // update manage
+  const updateManageAppFile = fs.readFileSync(
+    resolve('routes/algorand/teal/manageGreenBondApproval.teal'), 'utf8');
+  const updateManageAppProgram = updateManageAppFile.replace(
+    updateAppRep,
+    function(matched) {
+      return mapReplace[matched];
+    }
+  );
+  const updateManageApp = await compileProgram(updateManageAppProgram);
+  updateStatefulContract(manageAppId, account, updateManageApp, clear, params);
 
   // insert into apps table
   const newApp = await pool.query(
     "INSERT INTO apps(" + 
-      "app_id, name, description, issuer_address, bond_id, " + 
+      "app_id, manage_app_id, name, description, issuer_address, bond_id, " + 
       "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " + 
-      "stablecoin_escrow_program, bond_length, start_buy_date, " + 
+      "stablecoin_escrow_program, bond_length, period, start_buy_date, " + 
       "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" + 
     ")" + 
-    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *",
-    [appId, name, description, issuerAddr, bondId, bondEscrowAddr, 
-      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, sbd, 
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *",
+    [mainAppId, manageAppId, name, description, issuerAddr, bondId, bondEscrowAddr, 
+      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, period, sbd, 
       ebd, md, bondCost, bondCoupon, bondPrincipal]
   );
 

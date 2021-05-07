@@ -5,43 +5,82 @@ int 0
 txn OnCompletion
 int DeleteApplication
 ==
-bnz l22
+bnz l24
 txn OnCompletion
 int UpdateApplication
 ==
-bnz l21
+bnz l23
 txn OnCompletion
 int CloseOut
 ==
-bnz l20
+bnz l22
 txn OnCompletion
 int OptIn
 ==
-bnz l19
+bnz l21
 txna ApplicationArgs 0
 byte "buy"
 ==
-bnz l18
+bnz l20
 txna ApplicationArgs 0
 byte "trade"
 ==
-bnz l14
+bnz l16
 txna ApplicationArgs 0
 byte "coupon"
 ==
-bnz l10
+bnz l12
 txna ApplicationArgs 0
 byte "sell"
 ==
-bnz l9
+bnz l11
+txna ApplicationArgs 0
+byte "default"
+==
+bnz l10
 err
-l9:
+l10:
 int 0
 int VAR_TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 0
 store 1
-gtxn 1 AssetAmount
+gtxn 2 AssetAmount
+load 1
+==
+gtxn 2 Sender
+addr VAR_TMPL_BOND_ESCROW_ADDR
+==
+&&
+gtxn 3 Sender
+addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+==
+&&
+assert
+int 0
+byte "CouponsPayed"
+app_local_del
+byte "TotCouponsPayed"
+byte "TotCouponsPayed"
+app_global_get
+load 1
+int VAR_TMPL_BOND_LENGTH
+int 0
+byte "CouponsPayed"
+app_local_get
+-
+*
++
+app_global_put
+int 1
+b l25
+l11:
+int 0
+int VAR_TMPL_BOND_ID
+asset_holding_get AssetBalance
+store 0
+store 1
+gtxn 2 AssetAmount
 load 1
 ==
 int VAR_TMPL_BOND_LENGTH
@@ -54,11 +93,11 @@ int 0
 ==
 ||
 &&
-gtxn 1 Sender
+gtxn 2 Sender
 addr VAR_TMPL_BOND_ESCROW_ADDR
 ==
 &&
-gtxn 2 Sender
+gtxn 3 Sender
 addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
@@ -67,15 +106,18 @@ int VAR_TMPL_MATURITY_DATE
 >=
 &&
 assert
+int 0
+byte "CouponsPayed"
+app_local_del
 int 1
-b l23
-l10:
+b l25
+l12:
 int 0
 int VAR_TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 0
 store 1
-gtxn 2 AssetAmount
+gtxn 3 AssetAmount
 int VAR_TMPL_BOND_COUPON
 load 1
 *
@@ -86,19 +128,19 @@ app_local_get
 global LatestTimestamp
 int VAR_TMPL_MATURITY_DATE
 >
-bnz l12
+bnz l14
 global LatestTimestamp
 int VAR_TMPL_END_BUY_DATE
 -
-int 15768000
+int VAR_TMPL_PERIOD
 /
-b l13
-l12:
+b l15
+l14:
 int VAR_TMPL_BOND_LENGTH
-l13:
+l15:
 <
 &&
-gtxn 2 Sender
+gtxn 3 Sender
 addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
@@ -118,9 +160,9 @@ load 1
 +
 app_global_put
 int 1
-b l23
-l14:
-gtxn 1 Sender
+b l25
+l16:
+gtxn 2 Sender
 addr VAR_TMPL_BOND_ESCROW_ADDR
 ==
 global LatestTimestamp
@@ -140,15 +182,15 @@ store 3
 load 3
 int 0
 >
-bnz l16
+bnz l18
 int 1
 byte "CouponsPayed"
 int 0
 byte "CouponsPayed"
 app_local_get
 app_local_put
-b l17
-l16:
+b l19
+l18:
 int 0
 byte "CouponsPayed"
 app_local_get
@@ -157,11 +199,11 @@ byte "CouponsPayed"
 app_local_get
 ==
 assert
-l17:
+l19:
 int 1
-b l23
-l18:
-gtxn 1 Sender
+b l25
+l20:
+gtxn 2 Sender
 addr VAR_TMPL_BOND_ESCROW_ADDR
 ==
 global LatestTimestamp
@@ -172,21 +214,21 @@ int VAR_TMPL_END_BUY_DATE
 <=
 &&
 &&
-b l23
-l19:
+b l25
+l21:
 global GroupSize
 int 1
 ==
 assert
 int 1
-b l23
-l20:
-int 0
-b l23
-l21:
-int 0
-b l23
+b l25
 l22:
 int 0
+b l25
 l23:
+int 0
+b l25
+l24:
+int 0
+l25:
 &&
