@@ -6,7 +6,6 @@ import { algodClient, fundAccount, waitForConfirmation, STABLECOIN_ID } from '..
 import { configAsset, createAsset, optIntoAssetFromEscrow, revokeAsset } from '../assets/Asset.js';
 import { createStatefulContract, updateStatefulContract } from '../contracts/Stateful.js';
 import { compileProgram } from '../contracts/Utils.js';
-import { convertDateToUnixTime } from '../../../utils/Utils.js';
 
 /**
  * Issue bond
@@ -70,9 +69,7 @@ export async function issueBond(
     manageAppStateStorage, appArgs, params);
 
   // Used to construct contracts
-  const sbd = convertDateToUnixTime(startBuyDate);
-  const ebd = convertDateToUnixTime(endBuyDate);
-  const md = ebd + (period * bondLength);
+  const maturityDate = endBuyDate + (period * bondLength);
   let mapReplace = {
     VAR_TMPL_LV: params.lastRound + 500,
     VAR_TMPL_MAIN_APP_ID: mainAppId,
@@ -82,9 +79,9 @@ export async function issueBond(
     VAR_TMPL_ISSUER_ADDR: issuerAddr,
     VAR_TMPL_BOND_LENGTH: bondLength,
     VAR_TMPL_PERIOD: period,
-    VAR_TMPL_START_BUY_DATE: sbd,
-    VAR_TMPL_END_BUY_DATE: ebd,
-    VAR_TMPL_MATURITY_DATE: md,
+    VAR_TMPL_START_BUY_DATE: startBuyDate,
+    VAR_TMPL_END_BUY_DATE: endBuyDate,
+    VAR_TMPL_MATURITY_DATE: maturityDate,
     VAR_TMPL_BOND_COST: bondCost,
     VAR_TMPL_BOND_COUPON: bondCoupon,
     VAR_TMPL_BOND_PRINCIPAL: bondPrincipal
@@ -181,8 +178,8 @@ export async function issueBond(
     ")" + 
     "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *",
     [mainAppId, manageAppId, name, description, issuerAddr, bondId, bondEscrowAddr, 
-      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, period, sbd, 
-      ebd, md, bondCost, bondCoupon, bondPrincipal]
+      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, period, startBuyDate, 
+      endBuyDate, maturityDate, bondCost, bondCoupon, bondPrincipal]
   );
 
   return newApp.rows[0];
