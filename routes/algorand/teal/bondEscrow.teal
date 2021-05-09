@@ -54,10 +54,6 @@ gtxn 2 AssetReceiver
 gtxn 2 Sender
 ==
 &&
-gtxn 2 AssetCloseTo
-gtxn 2 Sender
-==
-&&
 &&
 gtxn 4 TypeEnum
 int pay
