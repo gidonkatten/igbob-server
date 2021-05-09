@@ -72,7 +72,7 @@ export async function issueBond(
   // Used to construct contracts
   const sbd = convertDateToUnixTime(startBuyDate);
   const ebd = convertDateToUnixTime(endBuyDate);
-  const md = ebd + (15768000 * bondLength);
+  const md = ebd + (period * bondLength);
   let mapReplace = {
     VAR_TMPL_LV: params.lastRound + 500,
     VAR_TMPL_MAIN_APP_ID: mainAppId,
