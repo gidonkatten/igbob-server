@@ -18,14 +18,14 @@ gtxn 0 TypeEnum
 int appl
 ==
 gtxn 0 ApplicationID
-int VAR_TMPL_MAIN_APP_ID
+int TMPL_MAIN_APP_ID
 ==
 &&
 gtxn 1 TypeEnum
 int appl
 ==
 gtxn 1 ApplicationID
-int VAR_TMPL_MANAGE_APP_ID
+int TMPL_MANAGE_APP_ID
 ==
 &&
 &&
@@ -37,7 +37,7 @@ int axfer
 ==
 &&
 gtxn 3 XferAsset
-int VAR_TMPL_STABLECOIN_ID
+int TMPL_STABLECOIN_ID
 ==
 &&
 &&
@@ -89,7 +89,7 @@ gtxn 0 Sender
 ==
 gtxn 3 AssetAmount
 gtxn 2 AssetAmount
-int VAR_TMPL_BOND_PRINCIPAL
+int TMPL_BOND_PRINCIPAL
 *
 ==
 &&
@@ -139,7 +139,7 @@ gtxn 3 AssetReceiver
 gtxn 0 Sender
 ==
 &&
-int VAR_TMPL_BOND_COUPON
+int TMPL_BOND_COUPON
 int 0
 >
 &&
@@ -158,11 +158,11 @@ int 1000
 <=
 &&
 txn XferAsset
-int VAR_TMPL_STABLECOIN_ID
+int TMPL_STABLECOIN_ID
 ==
 &&
 txn LastValid
-int VAR_TMPL_LV
+int TMPL_LV
 <
 &&
 l10:

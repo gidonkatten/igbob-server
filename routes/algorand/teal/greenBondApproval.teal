@@ -41,7 +41,7 @@ bnz l10
 err
 l10:
 int 0
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 0
 store 1
@@ -49,11 +49,11 @@ gtxn 2 AssetAmount
 load 1
 ==
 gtxn 2 Sender
-addr VAR_TMPL_BOND_ESCROW_ADDR
+addr TMPL_BOND_ESCROW_ADDR
 ==
 &&
 gtxn 3 Sender
-addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+addr TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
 assert
@@ -64,7 +64,7 @@ byte "TotCouponsPayed"
 byte "TotCouponsPayed"
 app_global_get
 load 1
-int VAR_TMPL_BOND_LENGTH
+int TMPL_BOND_LENGTH
 int 0
 byte "CouponsPayed"
 app_local_get
@@ -76,33 +76,33 @@ int 1
 b l25
 l11:
 int 0
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 0
 store 1
 gtxn 2 AssetAmount
 load 1
 ==
-int VAR_TMPL_BOND_LENGTH
+int TMPL_BOND_LENGTH
 int 0
 byte "CouponsPayed"
 app_local_get
 ==
-int VAR_TMPL_BOND_COUPON
+int TMPL_BOND_COUPON
 int 0
 ==
 ||
 &&
 gtxn 2 Sender
-addr VAR_TMPL_BOND_ESCROW_ADDR
+addr TMPL_BOND_ESCROW_ADDR
 ==
 &&
 gtxn 3 Sender
-addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+addr TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
 global LatestTimestamp
-int VAR_TMPL_MATURITY_DATE
+int TMPL_MATURITY_DATE
 >=
 &&
 assert
@@ -113,12 +113,12 @@ int 1
 b l25
 l12:
 int 0
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 0
 store 1
 gtxn 3 AssetAmount
-int VAR_TMPL_BOND_COUPON
+int TMPL_BOND_COUPON
 load 1
 *
 ==
@@ -126,22 +126,22 @@ int 0
 byte "CouponsPayed"
 app_local_get
 global LatestTimestamp
-int VAR_TMPL_MATURITY_DATE
+int TMPL_MATURITY_DATE
 >
 bnz l14
 global LatestTimestamp
-int VAR_TMPL_END_BUY_DATE
+int TMPL_END_BUY_DATE
 -
-int VAR_TMPL_PERIOD
+int TMPL_PERIOD
 /
 b l15
 l14:
-int VAR_TMPL_BOND_LENGTH
+int TMPL_BOND_LENGTH
 l15:
 <
 &&
 gtxn 3 Sender
-addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+addr TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
 assert
@@ -163,19 +163,19 @@ int 1
 b l25
 l16:
 gtxn 2 Sender
-addr VAR_TMPL_BOND_ESCROW_ADDR
+addr TMPL_BOND_ESCROW_ADDR
 ==
 global LatestTimestamp
-int VAR_TMPL_END_BUY_DATE
+int TMPL_END_BUY_DATE
 >
 global LatestTimestamp
-int VAR_TMPL_MATURITY_DATE
+int TMPL_MATURITY_DATE
 <
 &&
 &&
 assert
 int 1
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 2
 store 3
@@ -204,13 +204,13 @@ int 1
 b l25
 l20:
 gtxn 2 Sender
-addr VAR_TMPL_BOND_ESCROW_ADDR
+addr TMPL_BOND_ESCROW_ADDR
 ==
 global LatestTimestamp
-int VAR_TMPL_START_BUY_DATE
+int TMPL_START_BUY_DATE
 >=
 global LatestTimestamp
-int VAR_TMPL_END_BUY_DATE
+int TMPL_END_BUY_DATE
 <=
 &&
 &&

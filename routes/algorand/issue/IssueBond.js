@@ -17,6 +17,7 @@ export async function issueBond(
   bondUnitName,
   totalIssuance,
   issuerAddr,
+  greenVerifierAddr,
   bondLength,
   period,
   startBuyDate,
@@ -71,22 +72,23 @@ export async function issueBond(
   // Used to construct contracts
   const maturityDate = endBuyDate + (period * bondLength);
   let mapReplace = {
-    VAR_TMPL_LV: params.lastRound + 500,
-    VAR_TMPL_MAIN_APP_ID: mainAppId,
-    VAR_TMPL_MANAGE_APP_ID: manageAppId,
-    VAR_TMPL_BOND_ID: bondId,
-    VAR_TMPL_STABLECOIN_ID: STABLECOIN_ID,
-    VAR_TMPL_ISSUER_ADDR: issuerAddr,
-    VAR_TMPL_BOND_LENGTH: bondLength,
-    VAR_TMPL_PERIOD: period,
-    VAR_TMPL_START_BUY_DATE: startBuyDate,
-    VAR_TMPL_END_BUY_DATE: endBuyDate,
-    VAR_TMPL_MATURITY_DATE: maturityDate,
-    VAR_TMPL_BOND_COST: bondCost,
-    VAR_TMPL_BOND_COUPON: bondCoupon,
-    VAR_TMPL_BOND_PRINCIPAL: bondPrincipal
+    TMPL_LV: params.lastRound + 500,
+    TMPL_MAIN_APP_ID: mainAppId,
+    TMPL_MANAGE_APP_ID: manageAppId,
+    TMPL_BOND_ID: bondId,
+    TMPL_STABLECOIN_ID: STABLECOIN_ID,
+    TMPL_ISSUER_ADDR: issuerAddr,
+    TMPL_GREEN_VERIFIER_ADDR: greenVerifierAddr,
+    TMPL_BOND_LENGTH: bondLength,
+    TMPL_PERIOD: period,
+    TMPL_START_BUY_DATE: startBuyDate,
+    TMPL_END_BUY_DATE: endBuyDate,
+    TMPL_MATURITY_DATE: maturityDate,
+    TMPL_BOND_COST: bondCost,
+    TMPL_BOND_COUPON: bondCoupon,
+    TMPL_BOND_PRINCIPAL: bondPrincipal
   }
-  const escrowRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_MANAGE_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_PERIOD|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL/g
+  const escrowRep = /TMPL_LV|TMPL_MAIN_APP_ID|TMPL_MANAGE_APP_ID|TMPL_BOND_ID|TMPL_STABLECOIN_ID|TMPL_ISSUER_ADDR|TMPL_BOND_LENGTH|TMPL_PERIOD|TMPL_START_BUY_DATE|TMPL_END_BUY_DATE|TMPL_MATURITY_DATE|TMPL_BOND_COST|TMPL_BOND_COUPON|TMPL_BOND_PRINCIPAL/g
 
   // create escrow address for bond
   const bondEscrowFile = fs.readFileSync(
@@ -139,10 +141,10 @@ export async function issueBond(
   // update apps
   mapReplace = {
     ...mapReplace,
-    VAR_TMPL_STABLECOIN_ESCROW_ADDR: stcEscrowAddr,
-    VAR_TMPL_BOND_ESCROW_ADDR: bondEscrowAddr
+    TMPL_STABLECOIN_ESCROW_ADDR: stcEscrowAddr,
+    TMPL_BOND_ESCROW_ADDR: bondEscrowAddr
   }
-  const updateAppRep = /VAR_TMPL_LV|VAR_TMPL_MAIN_APP_ID|VAR_TMPL_MANAGE_APP_ID|VAR_TMPL_BOND_ID|VAR_TMPL_STABLECOIN_ID|VAR_TMPL_ISSUER_ADDR|VAR_TMPL_BOND_LENGTH|VAR_TMPL_PERIOD|VAR_TMPL_START_BUY_DATE|VAR_TMPL_END_BUY_DATE|VAR_TMPL_MATURITY_DATE|VAR_TMPL_BOND_COST|VAR_TMPL_BOND_COUPON|VAR_TMPL_BOND_PRINCIPAL|VAR_TMPL_STABLECOIN_ESCROW_ADDR|VAR_TMPL_BOND_ESCROW_ADDR/g
+  const updateAppRep = /TMPL_LV|TMPL_MAIN_APP_ID|TMPL_MANAGE_APP_ID|TMPL_BOND_ID|TMPL_STABLECOIN_ID|TMPL_ISSUER_ADDR|TMPL_GREEN_VERIFIER_ADDR|TMPL_BOND_LENGTH|TMPL_PERIOD|TMPL_START_BUY_DATE|TMPL_END_BUY_DATE|TMPL_MATURITY_DATE|TMPL_BOND_COST|TMPL_BOND_COUPON|TMPL_BOND_PRINCIPAL|TMPL_STABLECOIN_ESCROW_ADDR|TMPL_BOND_ESCROW_ADDR/g
   
   // update main
   const updateMainAppFile = fs.readFileSync(
@@ -171,15 +173,17 @@ export async function issueBond(
   // insert into apps table
   const newApp = await pool.query(
     "INSERT INTO apps(" + 
-      "app_id, manage_app_id, name, description, issuer_address, bond_id, " + 
-      "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " + 
+      "app_id, manage_app_id, name, description, issuer_address, " + 
+      "green_verifier_address, bond_id, bond_escrow_address, " + 
+      "bond_escrow_program, stablecoin_escrow_address, " + 
       "stablecoin_escrow_program, bond_length, period, start_buy_date, " + 
       "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" + 
     ")" + 
-    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *",
-    [mainAppId, manageAppId, name, description, issuerAddr, bondId, bondEscrowAddr, 
-      bondEscrowProgram, stcEscrowAddr, stcEscrowProgram, bondLength, period, startBuyDate, 
-      endBuyDate, maturityDate, bondCost, bondCoupon, bondPrincipal]
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *",
+    [mainAppId, manageAppId, name, description, issuerAddr, greenVerifierAddr, 
+      bondId, bondEscrowAddr, bondEscrowProgram, stcEscrowAddr, 
+      stcEscrowProgram, bondLength, period, startBuyDate, endBuyDate, 
+      maturityDate, bondCost, bondCoupon, bondPrincipal]
   );
 
   return newApp.rows[0];

@@ -2,57 +2,131 @@
 txn ApplicationID
 int 0
 ==
-bnz l28
+bnz l33
 txn OnCompletion
 int DeleteApplication
 ==
-bnz l27
+bnz l32
 txn OnCompletion
 int UpdateApplication
 ==
-bnz l26
+bnz l31
 txn OnCompletion
 int CloseOut
 ==
-bnz l25
+bnz l30
 txn OnCompletion
 int OptIn
 ==
-bnz l24
-txn OnCompletion
-int NoOp
-==
+bnz l29
+int 1
 bnz l7
 err
 l7:
+global LatestTimestamp
+int TMPL_MATURITY_DATE
+>=
+bnz l12
+global LatestTimestamp
+int TMPL_END_BUY_DATE
+<
+bnz l10
+global LatestTimestamp
+int TMPL_END_BUY_DATE
+-
+int TMPL_PERIOD
+/
+b l11
+l10:
+int 0
+l11:
+b l13
+l12:
+int TMPL_BOND_LENGTH
+l13:
+store 10
+txna ApplicationArgs 0
+byte "rate"
+==
+bz l18
+txna ApplicationArgs 1
+btoi
+store 12
+txna ApplicationArgs 2
+btoi
+store 13
+load 12
+load 10
+==
+load 13
+int 1
+>=
+load 13
+int 5
+<=
+&&
+&&
+txn Sender
+addr TMPL_GREEN_VERIFIER_ADDR
+==
+&&
+assert
+int 0
+load 12
+int 8
+/
+itob
+app_global_get_ex
+store 14
+store 15
+load 12
+int 8
+/
+itob
+load 14
+bnz l16
+byte 0x0000000000000000
+b l17
+l16:
+load 15
+l17:
+load 12
+int 8
+%
+load 13
+setbyte
+app_global_put
+int 1
+return
+l18:
 txna Applications 1
-int VAR_TMPL_MAIN_APP_ID
+int TMPL_MAIN_APP_ID
 ==
 txna Assets 0
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 ==
 &&
 txna Accounts 1
-addr VAR_TMPL_STABLECOIN_ESCROW_ADDR
+addr TMPL_STABLECOIN_ESCROW_ADDR
 ==
 &&
 txna Accounts 2
-addr VAR_TMPL_BOND_ESCROW_ADDR
+addr TMPL_BOND_ESCROW_ADDR
 ==
 &&
 assert
 int 1
-int VAR_TMPL_STABLECOIN_ID
+int TMPL_STABLECOIN_ID
 asset_holding_get AssetBalance
 store 0
 store 1
 int 2
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 2
 store 3
 int 0
-int VAR_TMPL_BOND_ID
+int TMPL_BOND_ID
 asset_holding_get AssetBalance
 store 4
 store 5
@@ -65,28 +139,8 @@ byte "TotCouponsPayed"
 app_global_get_ex
 store 8
 store 9
-int VAR_TMPL_BOND_COUPON
-global LatestTimestamp
-int VAR_TMPL_MATURITY_DATE
->=
-bnz l12
-global LatestTimestamp
-int VAR_TMPL_END_BUY_DATE
-<
-bnz l10
-global LatestTimestamp
-int VAR_TMPL_END_BUY_DATE
--
-int VAR_TMPL_PERIOD
-/
-b l11
-l10:
-int 0
-l11:
-b l13
-l12:
-int VAR_TMPL_BOND_LENGTH
-l13:
+int TMPL_BOND_COUPON
+load 10
 load 7
 load 3
 -
@@ -95,37 +149,37 @@ load 9
 -
 *
 global LatestTimestamp
-int VAR_TMPL_MATURITY_DATE
+int TMPL_MATURITY_DATE
 >=
-bnz l15
+bnz l20
 int 0
-b l16
-l15:
-int VAR_TMPL_BOND_PRINCIPAL
+b l21
+l20:
+int TMPL_BOND_PRINCIPAL
 load 7
 load 3
 -
 *
-l16:
+l21:
 +
 load 1
 >
-store 10
+store 11
 txna ApplicationArgs 0
 byte "defaulted"
 ==
-bnz l22
+bnz l27
 txna ApplicationArgs 0
 byte "not_defaulted"
 ==
-bnz l21
+bnz l26
 txna ApplicationArgs 0
 byte "claim_default"
 ==
-bnz l20
+bnz l25
 err
-l20:
-load 10
+l25:
+load 11
 load 7
 load 3
 -
@@ -136,27 +190,27 @@ gtxn 3 AssetAmount
 /
 ==
 &
-b l23
-l21:
-load 10
-!
-b l23
-l22:
-load 10
-l23:
-b l29
-l24:
-int 0
-b l29
-l25:
-int 0
-b l29
+b l28
 l26:
-int 0
-b l29
+load 11
+!
+b l28
 l27:
-int 0
-b l29
+load 11
 l28:
-int 1
+b l34
 l29:
+int 0
+b l34
+l30:
+int 0
+b l34
+l31:
+int 0
+b l34
+l32:
+int 0
+b l34
+l33:
+int 1
+l34:
