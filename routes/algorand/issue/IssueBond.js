@@ -55,7 +55,7 @@ export async function issueBond(
     localInts: 0,
     localBytes: 0,
     globalInts: 0,
-    globalBytes: 0,
+    globalBytes: Math.floor(bondLength / 8) + 1,
   }
   const appArgs = [];
   const initialApprovalProgram = fs.readFileSync(
