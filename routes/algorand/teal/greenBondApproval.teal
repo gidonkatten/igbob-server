@@ -168,10 +168,6 @@ addr TMPL_BOND_ESCROW_ADDR
 global LatestTimestamp
 int TMPL_END_BUY_DATE
 >
-global LatestTimestamp
-int TMPL_MATURITY_DATE
-<
-&&
 &&
 assert
 int 1
