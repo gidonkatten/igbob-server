@@ -49,7 +49,7 @@ export async function issueBond(
   const mainAppStateStorage = {
     localInts: 1, // CouponsPayed
     localBytes: 0,
-    globalInts: 3, // BondsSold, CouponsPayed, Reserve
+    globalInts: 2, // CouponsPayed, Reserve
     globalBytes: 0,
   }
   const manageAppStateStorage = {
