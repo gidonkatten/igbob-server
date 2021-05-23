@@ -47,16 +47,16 @@ export async function issueBond(
 
   // create apps
   const mainAppStateStorage = {
-    localInts: 1,
+    localInts: 1, // CouponsPayed
     localBytes: 0,
-    globalInts: 1,
+    globalInts: 3, // BondsSold, CouponsPayed, Reserve
     globalBytes: 0,
   }
   const manageAppStateStorage = {
     localInts: 0,
     localBytes: 0,
     globalInts: 0,
-    globalBytes: Math.floor(bondLength / 8) + 1,
+    globalBytes: Math.ceil((bondLength + 1) / 8), // <rating-array>
   }
   const appArgs = [];
   const initialApprovalTeal = compilePyTeal('initialStateful');
