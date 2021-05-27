@@ -1,6 +1,4 @@
 import algosdk from 'algosdk';
-import fs from 'fs';
-import { resolve } from 'path';
 import pool from "../../../db.js";
 import { algodClient, fundAccount, waitForConfirmation, STABLECOIN_ID } from '../utils/Utils.js';
 import { configAsset, createAsset, optIntoAssetFromEscrow, revokeAsset } from '../assets/Asset.js';
