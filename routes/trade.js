@@ -2,7 +2,7 @@ import algosdk from 'algosdk';
 import { Router } from 'express';
 import pool from "../db.js";
 import { checkJwt } from "../middleware/auth.js";
-import { generateTradeLsig } from "./algorand/trade/tradeBond.js";
+import { calculateExpiryRound, generateTradeLsig } from "./algorand/trade/tradeBond.js";
 import { getUserId } from '../utils/Utils.js';
 
 const router = Router();
@@ -10,15 +10,18 @@ const router = Router();
 router.post("/generate-trade", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
-    const { userAddress, mainAppId, bondId, price } = req.body;
+    const { userAddress, mainAppId, bondId, expiry, price } = req.body;
 
-    const contractAddress = generateTradeLsig(mainAppId)
+    const expiryRound = calculateExpiryRound(expiry);
+    const contractAddress = generateTradeLsig(
+      mainAppId, bondId, expiryRound, price
+    )
 
     // insert into trades table
     await pool.query(
       "INSERT INTO trades(user_id, user_address, bond_id, expiry_round, price)" + 
       "VALUES($1, $2, $3, $4, $5) RETURNING *",
-      [userAddress, userId, bondId, expiry, price]
+      [userAddress, userId, bondId, expiryRound, price]
     );
 
     res.json(contractAddress);

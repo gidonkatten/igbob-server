@@ -4,22 +4,26 @@ import { compileProgram } from '../contracts/Utils.js';
 import { compilePyTealWithParams } from '../../../utils/Utils.js';
 
 /**
- * Generate trade lsig which can then be signed by bond holder
+ * Calculate expiry round based on expiry time
  */
-export async function generateTradeLsig(
-  mainAppId,
-  bondId, 
-  expiry, 
-  price
-) {
-  // Calculate expiry round based on expiry time
+export async function calculateExpiryRound(expiry) {
   const { currentRound } = await algodClient.supply().do();
   const currentTime = Date.now() / 1000;
   const expiryRound = currentRound + ((expiry - currentTime) / 4.5);
 
   console.log(currentRound);
   console.log(expiryRound);
+}
 
+/**
+ * Generate trade lsig which can then be signed by bond holder
+ */
+export async function generateTradeLsig(
+  mainAppId,
+  bondId, 
+  expiryRound, 
+  price
+) {
   const args = {
     MAIN_APP_ID: mainAppId,
     BOND_ID: bondId,
@@ -33,8 +37,6 @@ export async function generateTradeLsig(
   const trade = await compileProgram(tradeTeal);
   const tradeLogSig = algosdk.makeLogicSig(trade);
   const tradeAddress = tradeLogSig.address();
-
-  console.log(trade);
 
   return tradeAddress;
 }
