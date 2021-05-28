@@ -17,6 +17,9 @@ export async function generateTradeLsig(
   const currentTime = Date.now() / 1000;
   const expiryRound = currentRound + ((expiry - currentTime) / 4.5);
 
+  console.log(currentRound);
+  console.log(expiryRound);
+
   const args = {
     MAIN_APP_ID: mainAppId,
     BOND_ID: bondId,
@@ -30,6 +33,8 @@ export async function generateTradeLsig(
   const trade = await compileProgram(tradeTeal);
   const tradeLogSig = algosdk.makeLogicSig(trade);
   const tradeAddress = tradeLogSig.address();
+
+  console.log(trade);
 
   return tradeAddress;
 }

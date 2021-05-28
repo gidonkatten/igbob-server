@@ -3,7 +3,7 @@ import cors from "cors";
 import { appsRoute } from "./routes/apps.js"
 import { accountsRoute } from "./routes/accounts.js"
 import { fundRoute } from "./routes/fund.js"
-import { tradeRoute } from "./routes/trade"
+import { tradeRoute } from "./routes/trade.js"
 
 const app = express();
 app.use(cors());
