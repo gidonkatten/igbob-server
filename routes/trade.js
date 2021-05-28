@@ -3,6 +3,7 @@ import { Router } from 'express';
 import pool from "../db.js";
 import { checkJwt } from "../middleware/auth.js";
 import { generateTradeLsig } from "./algorand/trade/tradeBond.js";
+import { getUserId } from '../utils/Utils.js';
 
 const router = Router();
 

@@ -40,7 +40,7 @@ export async function issueBond(
   console.log("Funded new account");
 
   // create bond (frozen)
-  const bondId = await createAsset(account, totalIssuance, 0, true,
+  const bondId = await createAsset(account, totalIssuance, 6, true,
     bondUnitName, bondName, params);
 
   // create apps
