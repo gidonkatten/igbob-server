@@ -61,8 +61,8 @@ router.get("/my-all-trades", checkJwt, async (req, res) => {
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE user_id = $2",
       [userId]
@@ -83,8 +83,8 @@ router.get("/my-live-trades", checkJwt, async (req, res) => {
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry < $1 AND user_id = $2",
       [currentTime, userId]
@@ -105,8 +105,8 @@ router.get("/my-expired-trades", checkJwt, async (req, res) => {
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " +  
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry >= $1 AND user_id = $2",
       [currentTime, userId]
@@ -124,8 +124,8 @@ router.get("/all-trades", checkJwt, async (req, res) => {
   try {
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " + 
       "FROM trades NATURAL JOIN apps"
     );
 
@@ -143,8 +143,8 @@ router.get("/live-trades", checkJwt, async (req, res) => {
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry > $1",
       [currentTime]
@@ -164,8 +164,8 @@ router.get("/expired-trades", checkJwt, async (req, res) => {
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, name, expiry, expiry_round, price, " + 
-      "seller_address, lsig " + 
+      "bond_escrow_program, name, expiry, expiry_round, price, seller_address" + 
+      "lsig, bond_length, maturity_date, bond_coupon, bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry >= $1",
       [currentTime]
