@@ -79,7 +79,7 @@ router.get("/my-all-trades", checkJwt, async (req, res) => {
 router.get("/my-live-trades", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
-    const currentTime = Date.now() / 1000;
+    const currentTime = parseInt(Date.now() / 1000);
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
@@ -101,7 +101,7 @@ router.get("/my-live-trades", checkJwt, async (req, res) => {
 router.get("/my-expired-trades", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
-    const currentTime = Date.now() / 1000;
+    const currentTime = parseInt(Date.now() / 1000);
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
@@ -139,7 +139,7 @@ router.get("/all-trades", checkJwt, async (req, res) => {
 
 router.get("/live-trades", checkJwt, async (req, res) => {
   try {
-    const currentTime = Date.now() / 1000;
+    const currentTime = parseInt(Date.now() / 1000);
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
@@ -160,7 +160,7 @@ router.get("/live-trades", checkJwt, async (req, res) => {
 
 router.get("/expired-trades", checkJwt, async (req, res) => {
   try {
-    const currentTime = Date.now() / 1000;
+    const currentTime = parseInt(Date.now() / 1000);
 
     const trades = await pool.query(
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
