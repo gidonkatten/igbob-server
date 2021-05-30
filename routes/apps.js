@@ -25,6 +25,23 @@ router.post("/create-app", checkJwt, async (req, res) => {
   }
 });
 
+router.get("/app/:app_id", async (req, res) => {
+  try {
+    const { app_id } = req.params;
+    const apps = await pool.query(
+      "SELECT * FROM apps WHERE app_id = $1",
+      [app_id]
+    );
+
+    if (apps.rows.length === 0) res.status(400).send('Cannot find app');
+    else res.json(apps.rows[0]);
+    
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 router.get("/all-apps", checkJwt, async (req, res) => {
   try {
     const apps = await pool.query(
