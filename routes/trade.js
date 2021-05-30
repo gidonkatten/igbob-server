@@ -19,7 +19,7 @@ router.post("/generate-trade", checkJwt, async (req, res) => {
 
     // insert into trades table
     const newTrade = await pool.query(
-      "INSERT INTO trades(user_id, user_address, bond_id, expiry_round, price)" + 
+      "INSERT INTO trades(user_id, seller_address, bond_id, expiry_round, price)" + 
       "VALUES($1, $2, $3, $4, $5) RETURNING *",
       [userId, userAddress, bondId, expiryRound, price]
     );
@@ -59,7 +59,13 @@ router.get("/my-all-trades", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
 
-    
+    // TODO
+    const trades = await pool.query(
+      "SELECT * FROM trades"
+    );
+
+    res.json(trades.rows);
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -70,6 +76,12 @@ router.get("/my-live-trades", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
 
+    // TODO
+    const trades = await pool.query(
+      "SELECT * FROM trades"
+    );
+
+    res.json(trades.rows);
     
   } catch (err) {
     console.error(err.message);
@@ -81,7 +93,13 @@ router.get("/my-expired-trades", checkJwt, async (req, res) => {
   try {
     const userId = getUserId(req);
 
-    
+    // TODO
+    const trades = await pool.query(
+      "SELECT * FROM trades"
+    );
+
+    res.json(trades.rows);
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -90,11 +108,12 @@ router.get("/my-expired-trades", checkJwt, async (req, res) => {
 
 router.get("/live-trades", checkJwt, async (req, res) => {
   try {
-    const apps = await pool.query(
-      "SELECT * FROM apps"
-    );
+  // TODO
+  const trades = await pool.query(
+    "SELECT * FROM trades"
+  );
 
-    res.json(apps.rows);
+  res.json(trades.rows);
     
   } catch (err) {
     console.error(err.message);
@@ -104,11 +123,12 @@ router.get("/live-trades", checkJwt, async (req, res) => {
 
 router.get("/expired-trades", checkJwt, async (req, res) => {
   try {
-    const apps = await pool.query(
-      "SELECT * FROM apps"
+    // TODO
+    const trades = await pool.query(
+      "SELECT * FROM trades"
     );
 
-    res.json(apps.rows);
+    res.json(trades.rows);
     
   } catch (err) {
     console.error(err.message);
@@ -118,11 +138,13 @@ router.get("/expired-trades", checkJwt, async (req, res) => {
 
 router.get("/all-trades", checkJwt, async (req, res) => {
   try {
-    const apps = await pool.query(
-      "SELECT * FROM apps"
+    const trades = await pool.query(
+      "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
+      "bond_escrow_program, name, expiry_round, price, seller_address, lsig " + 
+      "FROM trades NATURAL JOIN apps"
     );
 
-    res.json(apps.rows);
+    res.json(trades.rows);
     
   } catch (err) {
     console.error(err.message);
