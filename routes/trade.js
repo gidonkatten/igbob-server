@@ -20,7 +20,7 @@ router.post("/generate-trade", checkJwt, async (req, res) => {
     // insert into trades table
     const newTrade = await pool.query(
       "INSERT INTO trades(user_id, seller_address, bond_id, expiry_date, expiry_round, price)" + 
-      "VALUES($1, $2, $3, $4, $5) RETURNING *",
+      "VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
       [userId, userAddress, bondId, expiry, expiryRound, price]
     );
 
