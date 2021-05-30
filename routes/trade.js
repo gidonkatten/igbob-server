@@ -1,8 +1,7 @@
-import algosdk from 'algosdk';
 import { Router } from 'express';
 import pool from "../db.js";
 import { checkJwt } from "../middleware/auth.js";
-import { calculateExpiryRound, generateTradeLsig } from "./algorand/trade/tradeBond.js";
+import { calculateExpiryRound, generateTrade } from "./algorand/trade/tradeBond.js";
 import { getUserId } from '../utils/Utils.js';
 
 const router = Router();
@@ -12,19 +11,23 @@ router.post("/generate-trade", checkJwt, async (req, res) => {
     const userId = getUserId(req);
     const { userAddress, mainAppId, bondId, expiry, price } = req.body;
 
-    const expiryRound = calculateExpiryRound(expiry);
-    const contractAddress = generateTradeLsig(
-      mainAppId, bondId, expiryRound, price
-    )
+    const expiryRound = await calculateExpiryRound(expiry);
 
-    // insert into trades table
-    await pool.query(
-      "INSERT INTO trades(user_id, user_address, bond_id, expiry_round, price)" + 
-      "VALUES($1, $2, $3, $4, $5) RETURNING *",
-      [userAddress, userId, bondId, expiryRound, price]
+    const program = await generateTrade(
+      mainAppId, bondId, expiryRound, price
     );
 
-    res.json(contractAddress);
+    // insert into trades table
+    const newTrade = await pool.query(
+      "INSERT INTO trades(user_id, user_address, bond_id, expiry_round, price)" + 
+      "VALUES($1, $2, $3, $4, $5) RETURNING *",
+      [userId, userAddress, bondId, expiryRound, price]
+    );
+
+    res.json({
+      tradeId: newTrade.rows[0].trade_id,
+      program,
+    });
     
   } catch (err) {
     console.error(err.message);
@@ -40,7 +43,7 @@ router.post("/add-trade-lsig", checkJwt, async (req, res) => {
     // insert into trades table
      const trade = await pool.query(
       "UPDATE trades SET lsig = $1 " + 
-      "WHERE trade_id = $2 AND user_id = $3 RETURNING *" + 
+      "WHERE trade_id = $2 AND user_id = $3 RETURNING *",
       [lsig, tradeId, userId]
     );
 
