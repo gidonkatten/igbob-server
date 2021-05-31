@@ -88,10 +88,9 @@ router.get("/my-live-trades", checkJwt, async (req, res) => {
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
       "bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
-      "WHERE expiry_date < $1 AND user_id = $2",
+      "WHERE expiry_date > $1 AND user_id = $2",
       [currentTime, userId]
     );
-
     res.json(trades.rows);
     
   } catch (err) {
@@ -111,7 +110,7 @@ router.get("/my-expired-trades", checkJwt, async (req, res) => {
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
       "bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
-      "WHERE expiry_date >= $1 AND user_id = $2",
+      "WHERE expiry_date <= $1 AND user_id = $2",
       [currentTime, userId]
     );
 
@@ -141,7 +140,7 @@ router.get("/all-trades", checkJwt, async (req, res) => {
   }
 });
 
-router.get("/live-trades", async (req, res) => {
+router.get("/live-trades", checkJwt, async (req, res) => {
   try {
     const currentTime = parseInt(Date.now() / 1000);
 
@@ -173,7 +172,7 @@ router.get("/expired-trades", checkJwt, async (req, res) => {
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
       "bond_principal " + 
       "FROM trades NATURAL JOIN apps " + 
-      "WHERE expiry_date >= $1",
+      "WHERE expiry_date <= $1",
       [currentTime]
     );
 
@@ -185,4 +184,4 @@ router.get("/expired-trades", checkJwt, async (req, res) => {
   }
 });
 
-export { router as tradeRoute }
+export { router as tradesRoute }
