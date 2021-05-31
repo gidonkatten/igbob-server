@@ -13,20 +13,22 @@ router.post("/generate-trade", checkJwt, async (req, res) => {
 
     const expiryRound = await calculateExpiryRound(expiry);
 
-    const program = await generateTrade(
+    const { lsigProgram, lsig } = await generateTrade(
       mainAppId, bondId, expiryRound, price
     );
 
     // insert into trades table
     const newTrade = await pool.query(
-      "INSERT INTO trades(user_id, seller_address, bond_id, expiry_date, expiry_round, price)" + 
-      "VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
-      [userId, userAddress, bondId, expiry, expiryRound, price]
+      "INSERT INTO trades" + 
+      "(user_id, bond_id, expiry_round, expiry_date, " + 
+      "price, seller_address, lsig_program)" + 
+      "VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [userId, bondId, expiryRound, expiry, price, userAddress, lsigProgram]
     );
 
     res.json({
       tradeId: newTrade.rows[0].trade_id,
-      program,
+      tradeLsig: lsig,
     });
     
   } catch (err) {
@@ -63,7 +65,7 @@ router.get("/my-all-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE user_id = $2",
       [userId]
@@ -86,7 +88,7 @@ router.get("/my-live-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry_date > $1 AND user_id = $2",
       [currentTime, userId]
@@ -108,7 +110,7 @@ router.get("/my-expired-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry_date <= $1 AND user_id = $2",
       [currentTime, userId]
@@ -128,7 +130,7 @@ router.get("/all-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps"
     );
 
@@ -148,7 +150,7 @@ router.get("/live-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry_date > $1",
       [currentTime]
@@ -170,7 +172,7 @@ router.get("/expired-trades", checkJwt, async (req, res) => {
       "SELECT trade_id, app_id, bond_id, bond_escrow_address, " + 
       "bond_escrow_program, name, expiry_date, expiry_round, price, " + 
       "seller_address, lsig, bond_length, maturity_date, bond_coupon, " + 
-      "bond_principal " + 
+      "bond_principal, lsig_program " + 
       "FROM trades NATURAL JOIN apps " + 
       "WHERE expiry_date <= $1",
       [currentTime]

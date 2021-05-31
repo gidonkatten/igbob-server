@@ -30,5 +30,9 @@ export async function generateTrade(
 
   // create escrow address for bond
   const tradeTeal = compilePyTealWithParams('tradeLsig', args);
-  return await compileProgram(tradeTeal);
+  const trade = await compileProgram(tradeTeal);
+  return {
+    lsigProgram: tradeTeal,
+    lsig: trade
+  };
 }
