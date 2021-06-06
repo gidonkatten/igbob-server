@@ -45,9 +45,9 @@ export async function issueBond(
 
   // create apps
   const mainAppStateStorage = {
-    localInts: 2, // CouponsPaid, Trade
+    localInts: 3, // CouponsPaid, Trade, Frozen
     localBytes: 0,
-    globalInts: 2, // CouponsPaid, Reserve
+    globalInts: 3, // CouponsPaid, Reserve, Frozen
     globalBytes: 0,
   }
   const manageAppStateStorage = {
