@@ -165,4 +165,23 @@ router.get("/green-verifier-apps/:address", checkJwt, async (req, res) => {
   }
 });
 
+
+router.get("/financial-regulator-apps/:address", checkJwt, async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    const apps = await pool.query(
+      "SELECT * FROM apps " + 
+      "WHERE financial_regulator_address = $1",
+      [address]
+    );
+
+    res.json(apps.rows);
+    
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 export { router as appsRoute }
