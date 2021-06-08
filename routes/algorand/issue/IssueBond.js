@@ -143,16 +143,16 @@ export async function issueBond(
   const newApp = await pool.query(
     "INSERT INTO apps(" + 
       "app_id, manage_app_id, name, description, issuer_address, " + 
-      "green_verifier_address, bond_id, bond_escrow_address, " + 
-      "bond_escrow_program, stablecoin_escrow_address, " + 
+      "green_verifier_address, financial_regulator_address, bond_id, " + 
+      "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " + 
       "stablecoin_escrow_program, bond_length, period, start_buy_date, " + 
       "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" + 
     ")" + 
-    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *",
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *",
     [mainAppId, manageAppId, name, description, issuerAddr, greenVerifierAddr, 
-      bondId, bondEscrowAddr, bondEscrowTeal, stcEscrowAddr, 
-      stcEscrowTeal, bondLength, period, startBuyDate, endBuyDate, 
-      maturityDate, bondCost, bondCoupon, bondPrincipal]
+      financialRegulatorAddr, bondId, bondEscrowAddr, bondEscrowTeal, 
+      stcEscrowAddr, stcEscrowTeal, bondLength, period, startBuyDate, 
+      endBuyDate, maturityDate, bondCost, bondCoupon, bondPrincipal]
   );
 
   return newApp.rows[0];
