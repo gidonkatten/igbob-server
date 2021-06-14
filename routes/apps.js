@@ -13,6 +13,17 @@ router.post("/create-app", checkJwt, async (req, res) => {
       startBuyDate, endBuyDate, bondCost, bondCoupon, bondPrincipal
     } = req.body;
 
+    const currentTime = Date.now() / 1000;
+
+    if(!(
+      currentTime < startBuyDate &&
+      startBuyDate < endBuyDate &&
+      period > 0
+      )) {
+      res.status(400).send("Invalid timings");
+      return;
+    }
+
     issueBond(name, description, bondName, bondUnitName, totalIssuance, 
       issuerAddr, greenVerifierAddr, financialRegulatorAddr, bondLength, 
       period, startBuyDate, endBuyDate, bondCost, bondCoupon, bondPrincipal);
