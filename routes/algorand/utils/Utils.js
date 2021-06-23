@@ -1,11 +1,8 @@
 import algosdk from 'algosdk';
 
-const baseServer = 'https://testnet-algorand.api.purestake.io/ps2'
-const port = '';
-const token = {
-  'X-API-Key': process.env.PURESTAKE_API_KEY
-};
-export const algodClient = new algosdk.Algodv2(token, baseServer, port);
+const algodServer = 'https://testnet.algoexplorerapi.io/'
+const port = 443;
+export const algodClient = new algosdk.Algodv2('', algodServer, port);
 
 export const STABLECOIN_ID = 15435388;
 
