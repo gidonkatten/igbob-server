@@ -16,6 +16,8 @@ python3 -m pip install -r requirements.txt
 npm install
 ```
 
+Also have to supply your own funded Algorand account in environment file `ALGOD_ACCOUNT_MNEMONIC = "..."`.
+
 ## Usage
 To run locally use command `node index` .
 
