@@ -20,31 +20,31 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      
+
     - name: Cache dependencies
       uses: actions/cache@v2
       with:
         path: |
           **/node_modules
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-        
+
     - name: Install dependencies
       run: npm install
-      
+
     - name: Run the tests and generate coverage report
       run: npm test -- --coverage
-      
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
-      
+
     - name: Deploy
       uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
       with:
         heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-        heroku_app_name: "igbob" #Must be unique in Heroku
+        heroku_app_name: "blockchain-bonds-server" #Must be unique in Heroku
         heroku_email: "gidonkatten@gmail.com"
