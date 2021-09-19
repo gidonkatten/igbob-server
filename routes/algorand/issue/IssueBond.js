@@ -52,7 +52,6 @@ export async function issueBond(
     globalInts: 11,
     globalBytes: 6,
   }
-  const enc = new TextEncoder();
   let appArgs = [
     algosdk.encodeUint64(startBuyDate),
     algosdk.encodeUint64(endBuyDate),
@@ -62,9 +61,9 @@ export async function issueBond(
     algosdk.encodeUint64(bondPrincipal),
     algosdk.encodeUint64(bondLength),
     algosdk.encodeUint64(bondCost),
-    enc.encode(issuerAddr),
-    enc.encode(financialRegulatorAddr),
-    enc.encode(greenVerifierAddr),
+    algosdk.decodeAddress(issuerAddr).publicKey,
+    algosdk.decodeAddress(financialRegulatorAddr).publicKey,
+    algosdk.decodeAddress(greenVerifierAddr).publicKey,
   ];
   const initialApprovalTeal = compilePyTeal('initial');
   const clearTeal = compilePyTeal('clear');
@@ -109,8 +108,8 @@ export async function issueBond(
 
   // update main
   appArgs = [
-    enc.encode(stcEscrowAddr),
-    enc.encode(bondEscrowAddr),
+    algosdk.decodeAddress(stcEscrowAddr).publicKey,
+    algosdk.decodeAddress(bondEscrowAddr).publicKey,
   ]
   const updateAppTeal = compilePyTeal('stateful');
   const updateApp = await compileProgram(updateAppTeal);
