@@ -18,24 +18,10 @@ import YAML from 'yaml'
 /**
  * Compile PyTEAL program and return TEAL string
  */
- export function compilePyTeal(filename) {
-  const pythonProcess = spawnSync('python3', [`teal/${filename}.py`]);
+export function compilePyTeal(filename, ...args) {
+ const pythonProcess = spawnSync('python3', [`contracts/${filename}.py`, ...args]);
 
-  if (pythonProcess.stderr) console.log(pythonProcess.stderr.toString());
+ if (pythonProcess.stderr) console.log(pythonProcess.stderr.toString());
 
-  return pythonProcess.stdout.toString();
-}
-
-/**
- * Compile PyTEAL program and return TEAL string
- */
- export function compilePyTealWithParams(filename, params) {
-  const pythonProcess = spawnSync(
-    'python3', 
-    [`teal/${filename}.py`, YAML.stringify(params)]
-  );
-
-  if (pythonProcess.stderr) console.log(pythonProcess.stderr.toString());
-
-  return pythonProcess.stdout.toString();
+ return pythonProcess.stdout.toString();
 }

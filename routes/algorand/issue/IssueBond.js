@@ -4,7 +4,7 @@ import { algodClient, fundAccount, waitForConfirmation, STABLECOIN_ID } from '..
 import { configAsset, createAsset, optIntoAssetFromEscrow, revokeAsset } from '../assets/Asset.js';
 import { createStatefulContract, updateStatefulContract } from '../contracts/Stateful.js';
 import { compileProgram } from '../contracts/Utils.js';
-import { compilePyTeal, compilePyTealWithParams } from '../../../utils/Utils.js';
+import { compilePyTeal } from '../../../utils/Utils.js';
 
 /**
  * Issue bond
@@ -19,9 +19,9 @@ export async function issueBond(
   greenVerifierAddr,
   financialRegulatorAddr,
   bondLength,
-  period,
   startBuyDate,
   endBuyDate,
+  maturityDate,
   bondCost,
   bondCoupon,
   bondPrincipal,
@@ -30,6 +30,7 @@ export async function issueBond(
   let params = await algodClient.getTransactionParams().do();
   params.fee = 1000;
   params.flatFee = true;
+  const lv = params.lastRound + 500;
 
   // new algo account which will create bond + contract
   const account = algosdk.generateAccount();
@@ -45,57 +46,41 @@ export async function issueBond(
     bondUnitName, bondName, params);
 
   // create apps
-  const mainAppStateStorage = {
-    localInts: 3, // CouponsPaid, Trade, Frozen
+  const appStateStorage = {
+    localInts: 3,
     localBytes: 0,
-    globalInts: 3, // CouponsPaid, Reserve, Frozen
-    globalBytes: 0,
+    globalInts: 11,
+    globalBytes: 6,
   }
-  const manageAppStateStorage = {
-    localInts: 0,
-    localBytes: 0,
-    globalInts: 0,
-    globalBytes: Math.ceil((bondLength + 1) / 8), // <rating-array>
-  }
-  const appArgs = [];
-  const initialApprovalTeal = compilePyTeal('initialStateful');
-  const clearTeal = compilePyTeal('clearStateful');
+  const enc = new TextEncoder();
+  let appArgs = [
+    algosdk.encodeUint64(startBuyDate),
+    algosdk.encodeUint64(endBuyDate),
+    algosdk.encodeUint64(maturityDate),
+    algosdk.encodeUint64(bondId),
+    algosdk.encodeUint64(bondCoupon),
+    algosdk.encodeUint64(bondPrincipal),
+    algosdk.encodeUint64(bondLength),
+    algosdk.encodeUint64(bondCost),
+    enc.encode(issuerAddr),
+    enc.encode(financialRegulatorAddr),
+    enc.encode(greenVerifierAddr),
+  ];
+  const initialApprovalTeal = compilePyTeal('initial');
+  const clearTeal = compilePyTeal('clear');
   const initialApproval = await compileProgram(initialApprovalTeal);
   const clear = await compileProgram(clearTeal);
-  const mainAppId = await createStatefulContract(account, initialApproval, clear, 
-    mainAppStateStorage, appArgs, params);
-  const manageAppId = await createStatefulContract(account, initialApproval, clear, 
-    manageAppStateStorage, appArgs, params);
-
-  // Used to construct contracts
-  const maturityDate = endBuyDate + (period * bondLength);
-  let args = {
-    LV: params.lastRound + 500,
-    MAIN_APP_ID: mainAppId,
-    MANAGE_APP_ID: manageAppId,
-    BOND_ID: bondId,
-    STABLECOIN_ID: STABLECOIN_ID,
-    ISSUER_ADDR: issuerAddr,
-    GREEN_VERIFIER_ADDR: greenVerifierAddr,
-    FINANCIAL_REGULATOR_ADDR: financialRegulatorAddr,
-    BOND_LENGTH: bondLength,
-    PERIOD: period,
-    START_BUY_DATE: startBuyDate,
-    END_BUY_DATE: endBuyDate,
-    MATURITY_DATE: maturityDate,
-    BOND_COST: bondCost,
-    BOND_COUPON: bondCoupon,
-    BOND_PRINCIPAL: bondPrincipal
-  }
+  const appId = await createStatefulContract(account, initialApproval, clear,
+    appStateStorage, appArgs, 1, params);
 
   // create escrow address for bond
-  const bondEscrowTeal = compilePyTealWithParams('bondEscrow', args);
+  const bondEscrowTeal = compilePyTeal('bondEscrow', appId, bondId, lv);
   const bondEscrow = await compileProgram(bondEscrowTeal);
   const bondLogSig = algosdk.makeLogicSig(bondEscrow)
   const bondEscrowAddr = bondLogSig.address();
 
   // create escrow address for stablecoin
-  const stcEscrowTeal = compilePyTealWithParams('stablecoinEscrow', args);
+  const stcEscrowTeal = compilePyTeal('stablecoinEscrow', appId, STABLECOIN_ID, lv);
   const stcEscrow = await compileProgram(stcEscrowTeal);
   const stcLogSig = algosdk.makeLogicSig(stcEscrow)
   const stcEscrowAddr = stcLogSig.address();
@@ -122,36 +107,31 @@ export async function issueBond(
   // set bond clawback to 'bondEscrowAddr' + lock bond by clearing the freezer and manager
   configAsset(account, bondId, undefined, account.addr, undefined, bondEscrowAddr, params);
 
-  // update apps
-  args = {
-    ...args,
-    STABLECOIN_ESCROW_ADDR: stcEscrowAddr,
-    BOND_ESCROW_ADDR: bondEscrowAddr
-  }
-  
   // update main
-  const updateMainAppTeal = compilePyTealWithParams('greenBondApproval', args);
-  const updateMainApp = await compileProgram(updateMainAppTeal);
-  updateStatefulContract(mainAppId, account, updateMainApp, clear, params);
-
-  // update manage
-  const updateManageAppTeal = compilePyTealWithParams('manageGreenBondApproval', args);
-  const updateManageApp = await compileProgram(updateManageAppTeal);
-  updateStatefulContract(manageAppId, account, updateManageApp, clear, params);
+  appArgs = [
+    enc.encode(stcEscrowAddr),
+    enc.encode(bondEscrow),
+  ]
+  const updateAppTeal = compilePyTeal('stateful');
+  const updateApp = await compileProgram(updateAppTeal);
+  updateStatefulContract(appId, account, updateApp, clear, appArgs, params);
 
   // insert into apps table
+  const period = bondLength === 0 ?
+    (maturityDate - endBuyDate) :
+    Math.round((maturityDate - endBuyDate) / bondLength);
   const newApp = await pool.query(
-    "INSERT INTO apps(" + 
-      "app_id, manage_app_id, name, description, issuer_address, " + 
-      "green_verifier_address, financial_regulator_address, bond_id, " + 
-      "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " + 
-      "stablecoin_escrow_program, bond_length, period, start_buy_date, " + 
-      "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" + 
-    ")" + 
-    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *",
-    [mainAppId, manageAppId, name, description, issuerAddr, greenVerifierAddr, 
-      financialRegulatorAddr, bondId, bondEscrowAddr, bondEscrowTeal, 
-      stcEscrowAddr, stcEscrowTeal, bondLength, period, startBuyDate, 
+    "INSERT INTO apps(" +
+      "app_id, name, description, issuer_address, " +
+      "green_verifier_address, financial_regulator_address, bond_id, " +
+      "bond_escrow_address, bond_escrow_program, stablecoin_escrow_address, " +
+      "stablecoin_escrow_program, bond_length, period, start_buy_date, " +
+      "end_buy_date, maturity_date, bond_cost, bond_coupon, bond_principal" +
+    ")" +
+    "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *",
+    [appId, name, description, issuerAddr, greenVerifierAddr,
+      financialRegulatorAddr, bondId, bondEscrowAddr, bondEscrowTeal,
+      stcEscrowAddr, stcEscrowTeal, bondLength, period, startBuyDate,
       endBuyDate, maturityDate, bondCost, bondCoupon, bondPrincipal]
   );
 

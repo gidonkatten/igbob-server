@@ -10,6 +10,7 @@ export async function createStatefulContract(
   clearProgram,
   stateStorage,
   appArgs,
+  extraPages,
   params
 ) {
   if (params === undefined) {
@@ -24,9 +25,10 @@ export async function createStatefulContract(
   const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
   // Create, sign and send
-  const txn = algosdk.makeApplicationCreateTxn(account.addr, params,
-    onComplete, approvalProgram, clearProgram, localInts, localBytes, globalInts,
-    globalBytes, appArgs);
+  const txn = algosdk.makeApplicationCreateTxn(account.addr, params, onComplete,
+    approvalProgram, clearProgram, localInts, localBytes, globalInts, globalBytes,
+    appArgs, undefined, undefined, undefined,
+    undefined, undefined, undefined, extraPages);
   const rawSignedTxn = txn.signTxn(account.sk)
   const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
@@ -48,6 +50,7 @@ export async function createStatefulContract(
   account,
   approvalProgram,
   clearProgram,
+  appArgs,
   params
 ) {
   if (params === undefined) {
@@ -60,7 +63,7 @@ export async function createStatefulContract(
 
   // Create, sign and send
   const txn = algosdk.makeApplicationUpdateTxn(account.addr, params, appId,
-    approvalProgram, clearProgram);
+    approvalProgram, clearProgram, appArgs);
   const rawSignedTxn = txn.signTxn(account.sk)
   const txResult = await algodClient.sendRawTransaction(rawSignedTxn).do();
 
