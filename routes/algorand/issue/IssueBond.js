@@ -110,7 +110,7 @@ export async function issueBond(
   // update main
   appArgs = [
     enc.encode(stcEscrowAddr),
-    enc.encode(bondEscrow),
+    enc.encode(bondEscrowAddr),
   ]
   const updateAppTeal = compilePyTeal('stateful');
   const updateApp = await compileProgram(updateAppTeal);
