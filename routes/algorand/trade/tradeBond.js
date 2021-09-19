@@ -1,6 +1,6 @@
 import { algodClient, STABLECOIN_ID } from '../utils/Utils.js';
 import { compileProgram } from '../contracts/Utils.js';
-import { compilePyTealWithParams } from '../../../utils/Utils.js';
+import { compilePyTeal } from '../../../utils/Utils.js';
 
 /**
  * Calculate expiry round based on expiry time
@@ -15,21 +15,13 @@ export async function calculateExpiryRound(expiry) {
  * Generate trade teal to use for delegated signature
  */
 export async function generateTrade(
-  mainAppId,
-  bondId, 
-  expiryRound, 
+  appId,
+  bondId,
+  expiryRound,
   price
 ) {
-  const args = {
-    MAIN_APP_ID: mainAppId,
-    BOND_ID: bondId,
-    LV: expiryRound,
-    STABLECOIN_ID: STABLECOIN_ID,
-    TRADE_PRICE: price,
-  }
-
   // create escrow address for bond
-  const tradeTeal = compilePyTealWithParams('tradeLsig', args);
+  const tradeTeal = compilePyTeal('tradeLsig', appId, STABLECOIN_ID, bondId, expiryRound, price);
   const trade = await compileProgram(tradeTeal);
   return {
     lsigProgram: tradeTeal,
