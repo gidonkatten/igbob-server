@@ -111,7 +111,7 @@ export async function issueBond(
     algosdk.decodeAddress(stcEscrowAddr).publicKey,
     algosdk.decodeAddress(bondEscrowAddr).publicKey,
   ]
-  const updateAppTeal = compilePyTeal('stateful');
+  const updateAppTeal = compilePyTeal('stateful', STABLECOIN_ID);
   const updateApp = await compileProgram(updateAppTeal);
   updateStatefulContract(appId, account, updateApp, clear, appArgs, params);
 
